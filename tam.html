@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trams Montpellier · Temps Réel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<style>
+  :root {
+    --bg:#0a0c10;--surface:#12151c;--border:#1e2330;
+    --accent:#e8f439;--accent2:#39c5f4;--text:#e8eaf0;--muted:#6b7280;
+    --t1:#e8233a;--t2:#f97316;--t3:#3b82f6;--t4:#22c55e;--t5:#a855f7;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+  header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;z-index:1000}
+  .logo{display:flex;align-items:center;gap:10px}
+  .logo-icon{width:34px;height:34px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+  .logo h1{font-size:1rem;font-weight:800;letter-spacing:-0.02em}
+  .logo span{display:block;font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--muted);letter-spacing:0.06em;margin-top:1px}
+  .header-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .status-pill{display:flex;align-items:center;gap:7px;background:var(--border);padding:5px 12px;border-radius:999px;font-family:'Space Mono',monospace;font-size:0.65rem}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--muted);transition:background .3s}
+  .dot.live{background:#22c55e;animation:pulse 2s infinite}
+  .dot.error{background:#ef4444}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  #vehicle-count{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--accent)}
+  .refresh-btn{background:none;border:1px solid var(--border);color:var(--text);padding:5px 11px;border-radius:6px;font-family:'Space Mono',monospace;font-size:.65rem;cursor:pointer;transition:all .2s;letter-spacing:.05em}
+  .refresh-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .refresh-btn:disabled{opacity:.4;cursor:not-allowed}
+  .main{display:flex;flex:1;overflow:hidden}
+  .sidebar{width:230px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+  .sidebar-section{padding:14px;border-bottom:1px solid var(--border)}
+  .sidebar-label{font-family:'Space Mono',monospace;font-size:.58rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+  .line-filter{display:flex;flex-direction:column;gap:6px}
+  .line-btn{display:flex;align-items:center;gap:9px;background:none;border:1px solid var(--border);border-radius:7px;padding:7px 10px;cursor:pointer;transition:all .15s;font-family:'Syne',sans-serif;color:var(--text);font-size:.78rem;font-weight:700;text-align:left;width:100%}
+  .line-btn:hover{background:var(--border)}
+  .line-btn.active{background:rgba(255,255,255,.04)}
+  .line-btn.inactive{opacity:.3}
+  .line-dot{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:white;flex-shrink:0}
+  .line-count{margin-left:auto;font-family:'Space Mono',monospace;font-size:.62rem;color:var(--muted)}
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .stat-card{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:9px}
+  .stat-value{font-family:'Space Mono',monospace;font-size:1.25rem;font-weight:700;color:var(--accent);line-height:1}
+  .stat-label{font-size:.58rem;color:var(--muted);margin-top:3px}
+  .info-panel{padding:14px}
+  .info-panel p{font-size:.68rem;color:var(--muted);line-height:1.6}
+  .info-panel a{color:var(--accent2);text-decoration:none;font-size:.62rem;display:block;margin-top:7px;font-family:'Space Mono',monospace}
+  #map{flex:1;background:#0e1117}
+  #overlay{position:absolute;inset:0;background:rgba(10,12,16,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:14px}
+  #overlay.hidden{display:none}
+  .spinner{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loading-text{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--muted);letter-spacing:.08em}
+  #loading-detail{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--muted);opacity:.7;min-height:1em}
+  .tram-marker{display:flex;align-items:center;justify-content:center;border-radius:50%;border:2px solid rgba(255,255,255,.5);font-family:'Syne',sans-serif;font-weight:800;font-size:9px;color:white;box-shadow:0 2px 8px rgba(0,0,0,.6);cursor:pointer}
+  .leaflet-popup-content-wrapper{background:var(--surface)!important;border:1px solid var(--border);border-radius:10px!important;box-shadow:0 4px 24px rgba(0,0,0,.7)!important;color:var(--text)!important;font-family:'Syne',sans-serif}
+  .leaflet-popup-tip{background:var(--surface)!important}
+  .leaflet-popup-content{margin:12px 15px!important;min-width:170px}
+  .popup-title{font-weight:800;font-size:.88rem;display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .popup-row{display:flex;justify-content:space-between;font-size:.7rem;padding:3px 0;border-bottom:1px solid var(--border)}
+  .popup-row:last-child{border-bottom:none}
+  .popup-key{color:var(--muted)}
+  .popup-val{font-family:'Space Mono',monospace;font-size:.63rem}
+  #error-banner{display:none;background:#160a0a;border-bottom:1px solid #7f1d1d;color:#fca5a5;padding:8px 16px;font-family:'Space Mono',monospace;font-size:.65rem;text-align:center;line-height:1.5;flex-shrink:0}
+  .timer-wrap{height:2px;background:var(--border);flex-shrink:0}
+  .timer-bar{height:100%;background:var(--accent);width:100%}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🚊</div>
+    <div><h1>TaM Live</h1><span>MONTPELLIER · TEMPS RÉEL</span></div>
+  </div>
+  <div class="header-right">
+    <span id="vehicle-count">— véhicules</span>
+    <div class="status-pill">
+      <div class="dot" id="status-dot"></div>
+      <span id="status-text">Initialisation…</span>
+    </div>
+    <button class="refresh-btn" id="refresh-btn" onclick="manualRefresh()" disabled>⟳ ACTUALISER</button>
+  </div>
+</header>
+
+<div id="error-banner"></div>
+<div class="timer-wrap"><div class="timer-bar" id="timer-bar"></div></div>
+
+<div style="position:relative;flex:1;display:flex;overflow:hidden">
+  <div id="overlay">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loading-text">CHARGEMENT…</div>
+    <div id="loading-detail"></div>
+  </div>
+
+  <div class="main" style="flex:1;overflow:hidden;display:flex">
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Lignes de Tram</div>
+        <div class="line-filter">
+          <button class="line-btn active" data-line="ALL" onclick="filterLine('ALL',this)">
+            <div class="line-dot" style="background:#6b7280">∞</div>Toutes
+            <span class="line-count" id="count-ALL">–</span>
+          </button>
+          <button class="line-btn active" data-line="1" onclick="filterLine('1',this)">
+            <div class="line-dot" style="background:var(--t1)">1</div>Ligne 1
+            <span class="line-count" id="count-1">–</span>
+          </button>
+          <button class="line-btn active" data-line="2" onclick="filterLine('2',this)">
+            <div class="line-dot" style="background:var(--t2)">2</div>Ligne 2
+            <span class="line-count" id="count-2">–</span>
+          </button>
+          <button class="line-btn active" data-line="3" onclick="filterLine('3',this)">
+            <div class="line-dot" style="background:var(--t3)">3</div>Ligne 3
+            <span class="line-count" id="count-3">–</span>
+          </button>
+          <button class="line-btn active" data-line="4" onclick="filterLine('4',this)">
+            <div class="line-dot" style="background:var(--t4)">4</div>Ligne 4
+            <span class="line-count" id="count-4">–</span>
+          </button>
+          <button class="line-btn active" data-line="5" onclick="filterLine('5',this)">
+            <div class="line-dot" style="background:var(--t5)">5</div>Ligne 5
+            <span class="line-count" id="count-5">–</span>
+          </button>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Statistiques</div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-value" id="stat-total">–</div><div class="stat-label">Trams actifs</div></div>
+          <div class="stat-card"><div class="stat-value" id="stat-lines">–</div><div class="stat-label">Lignes</div></div>
+          <div class="stat-card" style="grid-column:span 2"><div class="stat-value" style="font-size:.8rem" id="stat-update">–</div><div class="stat-label">Dernière mise à jour</div></div>
+        </div>
+      </div>
+      <div class="info-panel">
+        <p>Données issues de l'API GTFS-RT officielle de <strong>Montpellier Méditerranée Métropole</strong> (open data ODbL).<br>Actualisation auto toutes les 30 s.</p>
+        <a href="https://data.montpellier3m.fr/dataset/offre-de-transport-tam-en-temps-reel" target="_blank">→ Source Open Data M3M</a>
+      </div>
+    </div>
+    <div id="map"></div>
+  </div>
+</div>
+
+<script>
+// ── Chargement séquentiel ──────────────────────────────────────────────────────
+function loadScript(src) {
+  return new Promise(function(resolve, reject) {
+    var s = document.createElement('script');
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+// ── XHR binaire (pas de fetch, pas d'AbortSignal) ────────────────────────────
+function xhrBinary(url, timeoutMs) {
+  return new Promise(function(resolve, reject) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.responseType = 'arraybuffer';
+    xhr.timeout = timeoutMs || 12000;
+    xhr.ontimeout = function() { reject(new Error('Timeout')); };
+    xhr.onerror   = function() { reject(new Error('Réseau KO')); };
+    xhr.onload    = function() {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(xhr.response);
+      } else {
+        reject(new Error('HTTP ' + xhr.status));
+      }
+    };
+    xhr.send();
+  });
+}
+
+// ── Config ────────────────────────────────────────────────────────────────────
+
+var GTFS_URL = 'https://data.montpellier3m.fr/GTFS/Urbain/VehiclePosition.pb';
+var REFRESH_MS = 30000;
+
+var LINE_COLORS = {'1':'#e8233a','2':'#f97316','3':'#3b82f6','4':'#22c55e','5':'#a855f7','def':'#6b7280'};
+
+var mapObj, FeedMsg;
+var markers = {}, vehicles = [], activeFilter = 'ALL';
+var proxyIdx = 0, interval = null;
+
+// ── Proto minimal ─────────────────────────────────────────────────────────────
+var PROTO = `
+syntax = "proto2";
+
+message FeedMessage {
+  required FeedHeader header = 1;
+  repeated FeedEntity entity = 2;
+}
+
+message FeedHeader {
+  required string gtfs_realtime_version = 1;
+  optional uint64 timestamp = 3;
+}
+
+message FeedEntity {
+  required string id = 1;
+  optional VehiclePosition vehicle = 4;
+}
+
+message VehiclePosition {
+  optional TripDescriptor trip = 1;
+  optional Position position = 2;
+  optional uint64 timestamp = 4;
+  optional string label = 6;
+}
+
+message TripDescriptor {
+  optional string trip_id = 1;
+  optional string route_id = 5;
+}
+
+message Position {
+  required float latitude = 1;
+  required float longitude = 2;
+  optional float bearing = 3;
+  optional float speed = 4;
+}
+`;
+
+// ── Bootstrap séquentiel ──────────────────────────────────────────────────────
+async function bootstrap() {
+  try {
+    setTxt('Chargement Leaflet…');
+    try { await loadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'); }
+    catch(e) { await loadScript('https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js'); }
+
+    setTxt('Chargement protobufjs…');
+    try { await loadScript('https://cdn.jsdelivr.net/npm/protobufjs@7.2.5/dist/protobuf.min.js'); }
+    catch(e) { await loadScript('https://unpkg.com/protobufjs@7.2.5/dist/protobuf.min.js'); }
+
+    setTxt('Initialisation carte…');
+    mapObj = L.map('map', { center: [43.6117, 3.8767], zoom: 13 });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '© OpenStreetMap © CARTO', subdomains: 'abcd', maxZoom: 19
+    }).addTo(mapObj);
+
+    setTxt('Décodage proto…');
+    var root = protobuf.parse(PROTO, { keepCase: true }).root;
+    FeedMsg = root.lookupType('FeedMessage');
+
+    setTxt('Récupération des véhicules…');
+    await fetchVehicles();
+
+    document.getElementById('refresh-btn').disabled = false;
+    interval = setInterval(fetchVehicles, REFRESH_MS);
+
+  } catch(err) {
+    console.error(err);
+    setStatus('error');
+    hideOverlay();
+    showErr('Erreur au démarrage : ' + err.message);
+  }
+}
+
+// ── Fetch binaire avec fallback proxy ─────────────────────────────────────────
+
+async function fetchVehicles() {
+  setStatus('loading');
+  hideErr();
+
+  try {
+    var buf = await xhrBinary(GTFS_URL, 12000);
+
+    var msg = FeedMsg.decode(new Uint8Array(buf));
+    console.log("Entity exemple:", msg.entity[0]);
+    var entities = msg.entity || [];
+
+    vehicles = entities
+      .filter(e => e.vehicle && e.vehicle.position)
+      .map(e => {
+        var v = e.vehicle;
+        var rid = (v.trip && v.trip.route_id) || '';
+        return {
+          id: e.id,
+          lat: v.position.latitude,
+          lng: v.position.longitude,
+          bearing: v.position.bearing || 0,
+          speed: v.position.speed || 0,
+          routeId: rid,
+          lineNum: extractLine(rid),
+          label: v.label || e.id,
+          ts: v.timestamp || 0
+        };
+      });
+
+    updateMarkers();
+    updateStats();
+    updateCounts();
+    setStatus('live');
+    hideOverlay();
+    restartTimer();
+
+  } catch (err) {
+    console.error(err);
+    setStatus('error');
+    hideOverlay();
+    showErr('Erreur : ' + err.message);
+  }
+}
+
+function extractLine(rid) {
+  var m = rid.match(/[Tt]?([1-5])/);
+  return m ? m[1] : null;
+}
+
+// ── Marqueurs ─────────────────────────────────────────────────────────────────
+function mkIcon(ln, bearing) {
+  var c = LINE_COLORS[ln] || LINE_COLORS['def'];
+  var lbl = ln || '?';
+  var sz = ln ? 27 : 20;
+  return L.divIcon({
+    className: '',
+    html: '<div class="tram-marker" style="width:' + sz + 'px;height:' + sz + 'px;background:' + c + ';transform:rotate(' + bearing + 'deg)">' + lbl + '</div>',
+    iconSize: [sz, sz], iconAnchor: [sz/2, sz/2]
+  });
+}
+
+function mkPopup(v) {
+  var c = LINE_COLORS[v.lineNum] || LINE_COLORS['def'];
+  var time = v.ts ? new Date(v.ts * 1000).toLocaleTimeString('fr-FR') : '–';
+  var spd  = v.speed > 0.5 ? Math.round(v.speed * 3.6) + ' km/h' : '–';
+  return '<div>'
+    + '<div class="popup-title">'
+    +   '<div style="width:18px;height:18px;border-radius:50%;background:' + c + ';display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff">' + (v.lineNum || '?') + '</div>'
+    +   ' Ligne ' + (v.lineNum || v.routeId || '?')
+    + '</div>'
+    + '<div class="popup-row"><span class="popup-key">Véhicule</span><span class="popup-val">' + v.label + '</span></div>'
+    + '<div class="popup-row"><span class="popup-key">Vitesse</span><span class="popup-val">' + spd + '</span></div>'
+    + '<div class="popup-row"><span class="popup-key">Cap</span><span class="popup-val">' + Math.round(v.bearing) + '°</span></div>'
+    + '<div class="popup-row"><span class="popup-key">MAJ position</span><span class="popup-val">' + time + '</span></div>'
+    + '</div>';
+}
+
+function updateMarkers() {
+  var ids = {};
+  vehicles.forEach(function(v) { ids[v.id] = true; });
+
+  // Supprimer les anciens marqueurs
+  Object.keys(markers).forEach(function(id) {
+    if (!ids[id]) { mapObj.removeLayer(markers[id]); delete markers[id]; }
+  });
+
+  vehicles.forEach(function(v) {
+    var vis = activeFilter === 'ALL' || v.lineNum === activeFilter;
+    var icon = mkIcon(v.lineNum, v.bearing);
+    if (markers[v.id]) {
+      markers[v.id].setLatLng([v.lat, v.lng]);
+      markers[v.id].setIcon(icon);
+      try { var p = markers[v.id].getPopup(); if(p) p.setContent(mkPopup(v)); } catch(e) {}
+    } else {
+      var m = L.marker([v.lat, v.lng], { icon: icon });
+      m.bindPopup(mkPopup(v), { maxWidth: 220 });
+      m.on('mouseover', function() { this.openPopup(); });
+      markers[v.id] = m;
+    }
+    if (vis) markers[v.id].addTo(mapObj);
+    else mapObj.removeLayer(markers[v.id]);
+  });
+}
+
+// ── Filtre ────────────────────────────────────────────────────────────────────
+function filterLine(line) {
+  activeFilter = (activeFilter === line && line !== 'ALL') ? 'ALL' : line;
+  document.querySelectorAll('.line-btn').forEach(function(b) {
+    var ok = activeFilter === 'ALL' || b.dataset.line === activeFilter || b.dataset.line === 'ALL';
+    b.classList.toggle('active', ok);
+    b.classList.toggle('inactive', !ok);
+  });
+  updateMarkers();
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
+function updateStats() {
+  document.getElementById('stat-total').textContent = vehicles.length;
+  var lines = {};
+  vehicles.forEach(function(v) { if(v.lineNum) lines[v.lineNum] = true; });
+  document.getElementById('stat-lines').textContent = Object.keys(lines).length;
+  document.getElementById('stat-update').textContent = new Date().toLocaleTimeString('fr-FR');
+  document.getElementById('vehicle-count').textContent = vehicles.length + ' véhicules';
+}
+function updateCounts() {
+  var c = {};
+  vehicles.forEach(function(v) { if(v.lineNum) c[v.lineNum] = (c[v.lineNum]||0)+1; });
+  document.getElementById('count-ALL').textContent = vehicles.length;
+  ['1','2','3','4','5'].forEach(function(l) {
+    var el = document.getElementById('count-'+l);
+    if (el) el.textContent = c[l] || 0;
+  });
+}
+
+// ── UI ─────────────────────────────────────────────────────────────
+function setStatus(s) {
+  const dot = document.getElementById('status-dot');
+  const txt = document.getElementById('status-text');
+
+  if (s === 'loading') {
+    dot.className = 'dot';
+    txt.textContent = 'Chargement…';
+  } else if (s === 'live') {
+    dot.className = 'dot live';
+    txt.textContent = 'EN DIRECT';
+  } else {
+    dot.className = 'dot error';
+    txt.textContent = 'ERREUR';
+  }
+}
+
+function setTxt(t) { document.getElementById('loading-text').textContent = t; }
+function showErr(m) {
+  const b = document.getElementById('error-banner');
+  b.innerHTML = m;
+  b.style.display = 'block';
+}
+function hideErr() {
+  document.getElementById('error-banner').style.display = 'none';
+}
+
+function manualRefresh() {
+  clearInterval(interval);
+  proxyIdx = 0; // réessaie depuis le premier proxy
+  fetchVehicles();
+  interval = setInterval(fetchVehicles, REFRESH_MS);
+}
+
+function hideOverlay() {
+  document.getElementById('overlay').classList.add('hidden');
+}
+
+function restartTimer() {
+  var bar = document.getElementById('timer-bar');
+  bar.style.transition = 'none';
+  bar.style.width = '100%';
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      bar.style.transition = 'width 30000ms linear';
+      bar.style.width = '0%';
+    });
+  });
+}
+
+bootstrap();
+</script>
+</body>
+</html>
