@@ -222,7 +222,7 @@ var BUS_IDS  = Object.keys(ROUTES).filter(function(k){return ROUTES[k].type!==0;
 // ═══════════════════════════════
 // THÈME
 // ═══════════════════════════════
-(function(){if(localStorage.getItem('tam-theme')==='light')document.documentElement.classList.add('light');})();
+(function(){var t=localStorage.getItem('tam-theme');if(t!=='dark'){document.documentElement.classList.add('light');}})();
 function toggleTheme(){
   var l=document.documentElement.classList.toggle('light');
   localStorage.setItem('tam-theme',l?'light':'dark');
