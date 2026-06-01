@@ -62,7 +62,7 @@
   @keyframes spin{to{transform:rotate(360deg)}}
   .loading-text{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--muted);letter-spacing:.08em}
   #loading-detail{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--muted);opacity:.7;min-height:1em}
-  .tram-marker{display:flex;align-items:center;justify-content:center;border-radius:50%;border:2px solid rgba(255,255,255,.5);font-family:'Syne',sans-serif;font-weight:800;font-size:9px;color:white;box-shadow:0 2px 8px rgba(0,0,0,.6);cursor:pointer}
+  .tram-marker{display:flex;align-items:center;justify-content:center;border-radius:50%;border:2.5px solid rgba(255,255,255,.85);font-family:'Syne',sans-serif;font-weight:800;font-size:12px;color:white;box-shadow:0 2px 10px rgba(0,0,0,.7);cursor:pointer;text-shadow:0 1px 2px rgba(0,0,0,.5);line-height:1}
   .leaflet-popup-content-wrapper{background:var(--surface)!important;border:1px solid var(--border);border-radius:10px!important;box-shadow:0 4px 24px rgba(0,0,0,.7)!important;color:var(--text)!important;font-family:'Syne',sans-serif}
   .leaflet-popup-tip{background:var(--surface)!important}
   .leaflet-popup-content{margin:12px 15px!important;min-width:170px}
@@ -351,15 +351,30 @@ async function fetchVehicles() {
 }
 
 function extractLine(rid) {
-  var m = rid.match(/[Tt]?([1-5])/);
-  return m ? m[1] : null;
+  if (!rid) return null;
+  // Log les route_ids réels au premier chargement pour debug
+  if (!window._loggedRids) {
+    window._loggedRids = true;
+    setTimeout(function() {
+      var rids = {};
+      vehicles.forEach(function(v) { if(v.routeId) rids[v.routeId] = true; });
+      console.log('route_ids reels:', Object.keys(rids).sort());
+    }, 1000);
+  }
+  // Cherche un chiffre 1-5 précédé de "ligne", "tram", "T", "L" ou en fin de chaîne
+  var m = rid.match(/(?:ligne|tram|[LT])([1-5])(?:[^0-9]|$)/i);
+  if (m) return m[1];
+  // Chiffre seul ou en fin
+  var m2 = rid.match(/(?:^|[^0-9])([1-5])(?:[^0-9]|$)/);
+  if (m2) return m2[1];
+  return null;
 }
 
 // ── Marqueurs ─────────────────────────────────────────────────────────────────
 function mkIcon(ln, bearing) {
   var c = LINE_COLORS[ln] || LINE_COLORS['def'];
   var lbl = ln || '?';
-  var sz = ln ? 27 : 20;
+  var sz = ln ? 32 : 22;
   return L.divIcon({
     className: '',
     html: '<div class="tram-marker" style="width:' + sz + 'px;height:' + sz + 'px;background:' + c + ';transform:rotate(' + bearing + 'deg)">' + lbl + '</div>',
