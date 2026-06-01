@@ -419,8 +419,15 @@ function toggleSec(id){
 // ═══════════════════════════════
 function buildStopMarkers(){
   Object.values(STOPS).forEach(function(s){
-    var icon=L.divIcon({className:'',html:'<div class="sdot"></div>',iconSize:[7,7],iconAnchor:[3.5,3.5]});
-    var m=L.marker([s[1],s[2]],{icon:icon,interactive:true,zIndexOffset:-200});
+    var m=L.circleMarker([s[1],s[2]],{
+      radius:4,
+      color:'#ffffff',
+      weight:1.5,
+      opacity:0.8,
+      fillColor:'#888',
+      fillOpacity:0.6,
+      interactive:true
+    });
     m.bindTooltip(s[0],{direction:'top',offset:[0,-4]});
     stopMarkers.push(m);
   });
