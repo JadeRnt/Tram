@@ -147,7 +147,7 @@
         </div>
       </div>
       <div class="info-panel">
-        <p>Données issues de l'API GTFS-RT officielle de <strong>Montpellier Méditerranée Métropole</strong> (open data ODbL).<br>Actualisation auto toutes les 30 s.</p>
+        <p>Données issues de l'API GTFS-RT officielle de <strong>Montpellier Méditerranée Métropole</strong> (open data ODbL).<br>Actualisation auto toutes les 10 s.</p>
         <a href="https://data.montpellier3m.fr/dataset/offre-de-transport-tam-en-temps-reel" target="_blank">→ Source Open Data M3M</a>
       </div>
     </div>
@@ -168,6 +168,15 @@ function toggleTheme() {
   var isLight = document.documentElement.classList.toggle('light');
   localStorage.setItem('tam-theme', isLight ? 'light' : 'dark');
   updateThemeBtn(isLight);
+  if (mapObj && window._darkTiles && window._lightTiles) {
+    if (isLight) {
+      mapObj.removeLayer(window._darkTiles);
+      window._lightTiles.addTo(mapObj);
+    } else {
+      mapObj.removeLayer(window._lightTiles);
+      window._darkTiles.addTo(mapObj);
+    }
+  }
 }
 
 function updateThemeBtn(isLight) {
@@ -214,7 +223,7 @@ function xhrBinary(url, timeoutMs) {
 
 // ── Config ────────────────────────────────────────────────────────────────────
 var GTFS_URL = 'https://tam-montpellier.jade-renaut.workers.dev';
-var REFRESH_MS = 30000;
+var REFRESH_MS = 10000;
 
 var LINE_COLORS = {'1':'#e8233a','2':'#f97316','3':'#3b82f6','4':'#22c55e','5':'#a855f7','def':'#6b7280'};
 
@@ -274,9 +283,9 @@ async function bootstrap() {
 
     setTxt('Initialisation carte…');
     mapObj = L.map('map', { center: [43.6117, 3.8767], zoom: 13 });
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '© OpenStreetMap © CARTO', subdomains: 'abcd', maxZoom: 19
-    }).addTo(mapObj);
+    window._darkTiles  = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',  { attribution: '© OpenStreetMap © CARTO', subdomains: 'abcd', maxZoom: 19 });
+    window._lightTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '© OpenStreetMap © CARTO', subdomains: 'abcd', maxZoom: 19 });
+    (document.documentElement.classList.contains('light') ? window._lightTiles : window._darkTiles).addTo(mapObj);
 
     setTxt('Décodage proto…');
     var root = protobuf.parse(PROTO, { keepCase: true }).root;
@@ -476,7 +485,7 @@ function restartTimer() {
   bar.style.width = '100%';
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      bar.style.transition = 'width 30000ms linear';
+      bar.style.transition = 'width 10000ms linear';
       bar.style.width = '0%';
     });
   });
