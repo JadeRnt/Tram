@@ -10,19 +10,20 @@
 <style>
 :root{
   --bg:#0a0c10;--surface:#12151c;--border:#1e2330;
-  --accent:#e8f439;--accent2:#39c5f4;--text:#e8eaf0;--muted:#6b7280;
-  --sidebar:272px;
+  --accent:#e8f439;--accent2:#39c5f4;--text:#e8eaf0;--muted:#5a6272;
+  --sidebar:256px;
 }
 :root.light{
-  --bg:#f0f2f5;--surface:#ffffff;--border:#d1d5db;
+  --bg:#f0f2f5;--surface:#ffffff;--border:#e5e7eb;
   --accent:#6b7a00;--accent2:#0284c7;--text:#111827;--muted:#9ca3af;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column;transition:background .25s,color .25s}
 
+/* HEADER */
 header{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;z-index:1000;gap:8px}
 .logo{display:flex;align-items:center;gap:9px;flex-shrink:0}
-.logo-icon{width:32px;height:32px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.logo-icon{width:32px;height:32px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:17px}
 .logo h1{font-size:.95rem;font-weight:800;letter-spacing:-.02em}
 .logo span{display:block;font-family:'Space Mono',monospace;font-size:.55rem;color:var(--muted);letter-spacing:.06em;margin-top:1px}
 .hright{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
@@ -41,75 +42,76 @@ header{display:flex;align-items:center;justify-content:space-between;padding:9px
 /* ── SIDEBAR ── */
 .sidebar{width:var(--sidebar);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
 
-.sb-top{flex-shrink:0;border-bottom:1px solid var(--border)}
-.view-tabs{display:flex;padding:8px 10px;gap:4px}
-.vtab{flex:1;padding:5px 2px;border:1px solid var(--border);border-radius:5px;font-family:'Space Mono',monospace;font-size:.57rem;cursor:pointer;background:none;color:var(--muted);transition:all .15s;text-align:center;letter-spacing:.02em;line-height:1.2}
-.vtab.on{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700}
+/* Onglets TOUT / TRAM / BUS */
+.view-tabs{display:flex;padding:8px 8px 0;gap:3px;flex-shrink:0}
+.vtab{flex:1;padding:6px 4px;border:none;border-radius:6px 6px 0 0;font-family:'Space Mono',monospace;font-size:.58rem;cursor:pointer;background:transparent;color:var(--muted);transition:all .15s;text-align:center;letter-spacing:.02em;border-bottom:2px solid transparent}
+.vtab:hover{color:var(--text)}
+.vtab.on{color:var(--text);border-bottom-color:var(--accent);font-weight:700}
 
-/* Barre d'actions (mode pick) */
-.pick-actions{display:none;padding:5px 10px;gap:4px;border-top:1px solid var(--border)}
-.pick-actions.show{display:flex}
-.pabtn{flex:1;padding:4px 6px;border:1px solid var(--border);border-radius:5px;font-family:'Space Mono',monospace;font-size:.57rem;cursor:pointer;background:none;color:var(--muted);transition:all .15s;text-align:center}
-.pabtn:hover{border-color:var(--accent);color:var(--accent)}
+/* Barre actions (tout cocher/décocher) — toujours visible */
+.act-bar{display:flex;gap:4px;padding:6px 8px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);flex-shrink:0}
+.abtn{flex:1;padding:4px 6px;border:1px solid var(--border);border-radius:5px;font-family:'Space Mono',monospace;font-size:.56rem;cursor:pointer;background:none;color:var(--muted);transition:all .15s;text-align:center}
+.abtn:hover{border-color:var(--accent);color:var(--accent)}
 
-.sb-scroll{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+/* Scroll */
+.sb-scroll{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent;padding:4px 0}
 
-/* Section (trams / bus) */
-.sec-hd{display:flex;align-items:center;justify-content:space-between;padding:7px 10px 3px;cursor:pointer;user-select:none;position:sticky;top:0;background:var(--surface);z-index:2}
-.sec-lbl{font-family:'Space Mono',monospace;font-size:.56rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:5px}
-.sec-arr{font-size:.58rem;color:var(--muted);transition:transform .2s}
+/* Entête section */
+.sec-hd{display:flex;align-items:center;justify-content:space-between;padding:6px 10px 2px;cursor:pointer;user-select:none;position:sticky;top:0;background:var(--surface);z-index:2}
+.sec-lbl{font-family:'Space Mono',monospace;font-size:.54rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:4px}
+.sec-arr{font-size:.55rem;color:var(--muted);transition:transform .2s}
 .sec-arr.closed{transform:rotate(-90deg)}
-.sec-body{padding:0 8px 6px}
 
-/* Ligne principale */
-.route-row{border-radius:6px;margin-bottom:2px;overflow:hidden;border:1px solid transparent}
-.route-row:hover{border-color:var(--border)}
-.route-row.sel{border-color:var(--border)}
-.route-row.off{opacity:.22}
+/* Liste routes */
+.sec-body{padding:2px 6px 6px}
 
-.route-head{display:flex;align-items:center;gap:6px;padding:5px 7px;cursor:pointer;transition:background .12s;width:100%;background:none;text-align:left;color:var(--text)}
-.route-head:hover{background:rgba(128,128,128,.06)}
-.rbadge{min-width:26px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:800;flex-shrink:0;padding:0 4px;letter-spacing:-.01em}
+/* Route + ses directions : pas de bordure, juste du spacing */
+.route-block{margin-bottom:1px}
+
+/* En-tête route : badge + nom + count */
+.route-head{display:flex;align-items:center;gap:6px;padding:4px 4px;border-radius:5px;cursor:pointer;width:100%;background:none;border:none;color:var(--text);text-align:left;transition:background .12s}
+.route-head:hover{background:rgba(128,128,128,.07)}
+.route-block.off .route-head{opacity:.3}
+.rbadge{min-width:24px;height:18px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:800;flex-shrink:0;padding:0 3px}
 .rbadge.sq{border-radius:3px}
-.rname{font-size:.72rem;font-weight:700;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rcount{font-family:'Space Mono',monospace;font-size:.58rem;color:var(--muted);flex-shrink:0;min-width:18px;text-align:right}
+.rbadge.circ{border-radius:50%;width:20px;height:20px}
+.rname{font-size:.68rem;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.rcount{font-family:'Space Mono',monospace;font-size:.56rem;color:var(--muted);flex-shrink:0;min-width:16px;text-align:right}
 
-/* Directions (sous-lignes) */
-.dir-list{padding:0 7px 4px 7px;display:flex;flex-direction:column;gap:2px}
-.dir-btn{display:flex;align-items:center;gap:5px;padding:3px 6px;border-radius:4px;cursor:pointer;background:none;border:1px solid transparent;color:var(--text);text-align:left;width:100%;transition:all .12s}
-.dir-btn:hover{background:rgba(128,128,128,.08);border-color:var(--border)}
-.dir-btn.dir-on{background:rgba(128,128,128,.1);border-color:var(--border)}
-.dir-btn.dir-off{opacity:.3}
-.dir-arrow{font-size:.65rem;flex-shrink:0;width:14px;text-align:center}
-.dir-label{font-size:.65rem;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dir-count{font-family:'Space Mono',monospace;font-size:.56rem;color:var(--muted);flex-shrink:0}
+/* Directions : sous le nom, indentées */
+.dir-list{padding:1px 0 3px 30px;display:flex;flex-direction:column;gap:1px}
+.dir-btn{display:flex;align-items:center;gap:4px;padding:2px 5px;border-radius:4px;cursor:pointer;background:none;border:none;color:var(--text);text-align:left;width:100%;transition:background .1s;opacity:.45}
+.dir-btn:hover{background:rgba(128,128,128,.07);opacity:.85}
+.dir-btn.on{opacity:1}
+.dir-btn.on .dir-pip{opacity:1}
+.dir-pip{width:7px;height:7px;border-radius:50%;flex-shrink:0;opacity:.35;transition:opacity .15s}
+.dir-lbl{font-size:.62rem;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dir-ct{font-family:'Space Mono',monospace;font-size:.54rem;color:var(--muted);flex-shrink:0}
 
 /* Stats */
 .sb-stats{padding:8px 10px;border-top:1px solid var(--border);flex-shrink:0}
-.slbl{font-family:'Space Mono',monospace;font-size:.54rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}
+.slbl{font-family:'Space Mono',monospace;font-size:.52rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
-.stat-card{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:6px 8px}
-.stat-val{font-family:'Space Mono',monospace;font-size:1rem;font-weight:700;color:var(--accent);line-height:1}
-.stat-lbl{font-size:.52rem;color:var(--muted);margin-top:2px}
-.sb-info{padding:6px 10px;border-top:1px solid var(--border);font-size:.58rem;color:var(--muted);flex-shrink:0;line-height:1.5}
-.sb-info a{color:var(--accent2);text-decoration:none;font-family:'Space Mono',monospace;font-size:.56rem}
+.stat-card{background:var(--bg);border-radius:5px;padding:6px 8px}
+.stat-val{font-family:'Space Mono',monospace;font-size:.95rem;font-weight:700;color:var(--accent);line-height:1}
+.stat-lbl{font-size:.5rem;color:var(--muted);margin-top:2px}
+.sb-info{padding:5px 10px 7px;font-size:.56rem;color:var(--muted);flex-shrink:0;line-height:1.5}
+.sb-info a{color:var(--accent2);text-decoration:none}
 
+/* MAP */
 #map{flex:1;background:#0e1117}
 #overlay{position:absolute;inset:0;background:rgba(10,12,16,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:12px}
 #overlay.hidden{display:none}
 .spinner{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.ltxt{font-family:'Space Mono',monospace;font-size:.66rem;color:var(--muted);letter-spacing:.07em}
+.ltxt{font-family:'Space Mono',monospace;font-size:.64rem;color:var(--muted);letter-spacing:.07em}
 
-/* Marqueurs véhicules */
-.vm{display:flex;align-items:center;justify-content:center;border-radius:50%;border:2.5px solid rgba(255,255,255,.88);font-family:'Syne',sans-serif;font-weight:800;font-size:11px;color:white;box-shadow:0 2px 8px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.2);cursor:pointer;text-shadow:0 1px 3px rgba(0,0,0,.5);line-height:1}
+/* Marqueurs */
+.vm{display:flex;align-items:center;justify-content:center;border-radius:50%;border:2.5px solid rgba(255,255,255,.88);font-family:'Syne',sans-serif;font-weight:800;font-size:11px;color:white;box-shadow:0 2px 8px rgba(0,0,0,.55);cursor:pointer;text-shadow:0 1px 3px rgba(0,0,0,.5);line-height:1}
 .vm.bus{border-radius:5px!important;font-size:9px!important}
 .vm.dk{color:#111!important;text-shadow:none!important;border-color:rgba(0,0,0,.3)!important}
-/* Flèche cap */
 .vw{position:relative;display:inline-flex;align-items:center;justify-content:center}
 .va{position:absolute;top:-6px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:3.5px solid transparent;border-right:3.5px solid transparent;border-bottom:6px solid rgba(255,255,255,.82);pointer-events:none}
-
-/* Arrêts */
 .sdot{width:7px;height:7px;border-radius:50%;border:1.5px solid rgba(255,255,255,.55);background:rgba(255,255,255,.2)}
 
 /* Popup */
@@ -146,7 +148,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:9px
     <div class="status-pill"><div class="dot" id="sdot"></div><span id="stxt">Init…</span></div>
     <button class="ibtn" id="stops-btn" onclick="toggleStops()">⬤ ARRÊTS</button>
     <button class="ibtn" id="theme-btn" onclick="toggleTheme()"><span id="ticon">☀️</span><span id="tlbl">LIGHT</span></button>
-    <button class="ibtn" id="refresh-btn" onclick="manualRefresh()" disabled>⟳ ACTUALISER</button>
+    <button class="ibtn" id="refresh-btn" onclick="manualRefresh()" disabled>⟳</button>
   </div>
 </header>
 <div id="error-banner"></div>
@@ -158,19 +160,17 @@ header{display:flex;align-items:center;justify-content:space-between;padding:9px
   <div class="main" style="flex:1;display:flex;overflow:hidden">
     <div class="sidebar">
 
-      <!-- Onglets vue -->
-      <div class="sb-top">
-        <div class="view-tabs">
-          <button class="vtab on"  id="tab-all"  onclick="setView('all')">TOUT</button>
-          <button class="vtab"     id="tab-tram" onclick="setView('tram')">🚊 TRAM</button>
-          <button class="vtab"     id="tab-bus"  onclick="setView('bus')">🚌 BUS</button>
-          <button class="vtab"     id="tab-pick" onclick="setView('pick')">✏️ CHOIX</button>
-        </div>
-        <!-- Boutons tout cocher/décocher (mode pick seulement) -->
-        <div class="pick-actions" id="pick-actions">
-          <button class="pabtn" onclick="selectAll(true)">✓ Tout cocher</button>
-          <button class="pabtn" onclick="selectAll(false)">✗ Tout décocher</button>
-        </div>
+      <!-- Onglets filtre principal -->
+      <div class="view-tabs">
+        <button class="vtab on"  id="tab-all"  onclick="setView('all')">TOUT</button>
+        <button class="vtab"     id="tab-tram" onclick="setView('tram')">🚊 TRAM</button>
+        <button class="vtab"     id="tab-bus"  onclick="setView('bus')">🚌 BUS</button>
+      </div>
+
+      <!-- Tout cocher / décocher — toujours visible -->
+      <div class="act-bar">
+        <button class="abtn" onclick="selectAll(true)">✓ Tout cocher</button>
+        <button class="abtn" onclick="selectAll(false)">✗ Tout décocher</button>
       </div>
 
       <div class="sb-scroll" id="sb-scroll">
@@ -194,12 +194,12 @@ header{display:flex;align-items:center;justify-content:space-between;padding:9px
         <div class="stat-grid">
           <div class="stat-card"><div class="stat-val" id="st-tram">–</div><div class="stat-lbl">Trams actifs</div></div>
           <div class="stat-card"><div class="stat-val" id="st-bus">–</div><div class="stat-lbl">Bus actifs</div></div>
-          <div class="stat-card" style="grid-column:span 2"><div class="stat-val" style="font-size:.72rem" id="st-upd">–</div><div class="stat-lbl">Dernière MAJ</div></div>
+          <div class="stat-card" style="grid-column:span 2"><div class="stat-val" style="font-size:.7rem" id="st-upd">–</div><div class="stat-lbl">Dernière MAJ</div></div>
         </div>
       </div>
       <div class="sb-info">
-        Données GTFS-RT <strong>M3M</strong> (ODbL) · rafraîch. 10 s<br>
-        <a href="https://data.montpellier3m.fr/dataset/offre-de-transport-tam-en-temps-reel" target="_blank">→ Open Data M3M</a>
+        GTFS-RT <strong>M3M</strong> (ODbL) · 10 s ·
+        <a href="https://data.montpellier3m.fr/dataset/offre-de-transport-tam-en-temps-reel" target="_blank">Open Data</a>
       </div>
     </div>
 
@@ -208,57 +208,49 @@ header{display:flex;align-items:center;justify-content:space-between;padding:9px
 </div>
 
 <script>
-// ═══════════════════════════════════════
-// DONNÉES GTFS STATIQUES
-// ═══════════════════════════════════════
+// ═══════════════════════════════
+// DONNÉES GTFS
+// ═══════════════════════════════
 var ROUTES = {"1":{"short":"1","long":"Mosson - Gare Sud de France","type":0,"color":"#005CA9","text":"#FFFFFF"},"10":{"short":"10","long":"Cimetiere St-Lazare - Celleneuve","type":3,"color":"#FFB900","text":"#000000"},"11":{"short":"11","long":"La Martelle - Tournezy","type":3,"color":"#5FC3E1","text":"#000000"},"13":{"short":"13","long":"Occitanie - Charles de Gaulle","type":3,"color":"#941B80","text":"#FFFFFF"},"14":{"short":"14","long":"Leon Blum - Place de l'Europe","type":3,"color":"#F3A08C","text":"#000000"},"15":{"short":"15","long":"Gare Sud de France - Sabines","type":3,"color":"#BF0D0D","text":"#FFFFFF"},"16":{"short":"16","long":"Ch. de Gaulle - Port Marianne","type":3,"color":"#009EE2","text":"#000000"},"17":{"short":"17","long":"Les Bouisses - Gare Saint-Roch","type":3,"color":"#DCC900","text":"#000000"},"18":{"short":"18","long":"Sabines - Maurin - Lattes Centre","type":3,"color":"#E84E24","text":"#000000"},"19":{"short":"19","long":"P. Coubertin - Hotel Departement","type":3,"color":"#FFD400","text":"#000000"},"2":{"short":"2","long":"St-Jean de Vedas Centre - Jacou","type":0,"color":"#EF7D00","text":"#000000"},"20":{"short":"20","long":"St-Jean le Sec - Parc Font-Colom","type":3,"color":"#009EE2","text":"#000000"},"21":{"short":"21","long":"ND de Sablassou - Vendargues","type":3,"color":"#FFE500","text":"#000000"},"22":{"short":"22","long":"Cirad de Baillarguet - Clapiers","type":3,"color":"#81CFF4","text":"#000000"},"23":{"short":"23","long":"Clapiers - Prades-le-Lez","type":3,"color":"#F29100","text":"#000000"},"24":{"short":"24","long":"Grabels: La Valsiere - Le Pradas","type":3,"color":"#A61680","text":"#FFFFFF"},"25":{"short":"25","long":"Courpouyran - Le Martinet","type":3,"color":"#904E00","text":"#FFFFFF"},"26":{"short":"26","long":"Montferrier-sur-Lez - Montferrie","type":3,"color":"#306980","text":"#FFFFFF"},"27":{"short":"27","long":"Stade de Montaud- Gare de Bailla","type":3,"color":"#E20613","text":"#FFFFFF"},"28":{"short":"28","long":"Boirargues - Cabanes Perols","type":3,"color":"#F29100","text":"#000000"},"3":{"short":"3","long":"Juvignac - Lattes / Perols","type":0,"color":"#C8D400","text":"#000000"},"30":{"short":"30","long":"Le Cres Jean Jaures / Le Cres Ma","type":3,"color":"#F4B4D2","text":"#000000"},"31":{"short":"31","long":"ND Sablassou - Baillargues via S","type":3,"color":"#A9B400","text":"#000000"},"32":{"short":"32","long":"Garcia Lorca - Villeneuve-les-M.","type":3,"color":"#008288","text":"#000000"},"33":{"short":"33","long":"St-Jean de Vedas (Centre)-Fabreg","type":3,"color":"#C7D300","text":"#000000"},"34":{"short":"34","long":"Mosson - Cournonsec","type":3,"color":"#729957","text":"#000000"},"35":{"short":"35","long":"Ch. de Gaulle-A.Rouge/Aires","type":3,"color":"#164193","text":"#FFFFFF"},"36":{"short":"36","long":"Charles de Gaulle - Cap Alpha -","type":3,"color":"#E20613","text":"#FFFFFF"},"38":{"short":"38","long":"Gres de Montpellier - Cournonsec","type":3,"color":"#8C004C","text":"#FFFFFF"},"4":{"short":"4","long":"Garcia Lorca - Garcia Lorca","type":0,"color":"#4B2A0E","text":"#FFFFFF"},"40":{"short":"40","long":"Mosson - St-Georges d'Orques","type":3,"color":"#FFDC00","text":"#000000"},"41":{"short":"41","long":"Castelnau:Ch.Gaulle-CliniqueParc","type":3,"color":"#74B859","text":"#000000"},"42":{"short":"42","long":"Mosson - Murviel les Montpellier","type":3,"color":"#E5007E","text":"#000000"},"43":{"short":"43","long":"St-Jean-le-Sec - Saussan - Pigna","type":3,"color":"#FABC43","text":"#000000"},"44":{"short":"44","long":"Navette Gare Villeneuve-les-M.","type":3,"color":"#E95296","text":"#000000"},"46":{"short":"46","long":"ND Sablassou - Castries College","type":3,"color":"#7A1C79","text":"#FFFFFF"},"47":{"short":"47","long":"Universite Montpellier Triolet","type":3,"color":"#B6C952","text":"#000000"},"5":{"short":"5","long":"Clapiers - Gres de Montpellier","type":0,"color":"#287431","text":"#FFFFFF"},"50":{"short":"50","long":"Navette Gare","type":3,"color":"#0059A1","text":"#FFFFFF"},"52":{"short":"52","long":"Place de France - Cimetiere St.E","type":3,"color":"#FFE500","text":"#000000"},"53":{"short":"53","long":"Sabines - Saint-Cleophas","type":3,"color":"#95C11F","text":"#000000"},"6":{"short":"6","long":"Euromedecine - Albert 1er","type":3,"color":"#E94190","text":"#000000"},"7":{"short":"7","long":"Hotel du Departement - Albert 1e","type":3,"color":"#A777B1","text":"#000000"},"8":{"short":"8","long":"Centrayrargues - Gare Saint-Roch","type":3,"color":"#FFDC00","text":"#000000"},"96":{"short":"96","long":"Navette Ovalie","type":3,"color":"#1C3C6E","text":"#FFFFFF"},"A":{"short":"A","long":"ND de Sablassou-Pl. de l'Europe","type":3,"color":"#841931","text":"#FFFFFF"}};
 var STOPS  = {"1071":["Mosson",43.61628,3.81979],"1072":["Halles de la Paillade",43.62756,3.81753],"1073":["Saint-Paul",43.63065,3.82109],"1074":["Hauts de Massane",43.63628,3.82271],"1075":["Euromédecine",43.63897,3.82771],"1076":["Malbosc - Domaine d'Ô",43.6346,3.8332],"1077":["Château d'Ô",43.63161,3.84308],"1078":["Occitanie Hôpitaux - Facultés",43.63462,3.84849],"1079":["Hôpital Lapeyronie",43.63165,3.85258],"1080":["Université Montpellier - Triolet",43.62913,3.86159],"1081":["Saint-Éloi",43.62699,3.8657],"1082":["Boutonnet - Cité des Arts",43.62259,3.86809],"1083":["Stade Philippidès",43.61899,3.86948],"1084":["Albert 1er - Saint-Charles",43.61649,3.87409],"1085":["Louis Blanc - Agora de la Danse",43.61472,3.87812],"1086":["Corum",43.6142,3.88181],"1087":["Comédie",43.6084,3.87976],"1088":["Gare Saint-Roch",43.60576,3.88016],"1752":["Du Guesclin",43.60713,3.88326],"1090":["Antigone",43.60858,3.88668],"1091":["Léon Blum",43.60891,3.89015],"1092":["Place de l'Europe",43.60735,3.89396],"1093":["Rives du Lez",43.60422,3.89488],"1094":["Moularès (Hôtel de Ville)",43.60059,3.89552],"1095":["Port Marianne",43.60166,3.89987],"1652":["Mondial 98",43.60276,3.90408],"1096":["Millénaire",43.60334,3.90997],"1097":["Odysseum",43.6038,3.92037],"1540":["Place de France",43.60372,3.91574],"1764":["Stade de la Mosson",43.62126,3.81739],"2446":["Gare Sud de France",43.59703,3.9221],"1098":["Odysseum",43.60381,3.92041],"1099":["Millénaire",43.60338,3.90997],"1653":["Mondial 98",43.60278,3.90407],"1100":["Port Marianne",43.60152,3.89934],"1101":["Moularès (Hôtel de Ville)",43.60062,3.89556],"1102":["Rives du Lez",43.60422,3.89491],"1103":["Place de l'Europe",43.60735,3.89391],"1104":["Léon Blum",43.60894,3.89016],"1105":["Antigone",43.60858,3.88663],"1751":["Du Guesclin",43.60714,3.88323],"1107":["Gare Saint-Roch",43.60577,3.88021],"1108":["Comédie",43.60837,3.8798],"1109":["Corum",43.61423,3.88179],"1110":["Louis Blanc - Agora de la Danse",43.61475,3.87812],"1111":["Albert 1er - Saint-Charles",43.61652,3.87413],"1112":["Stade Philippidès",43.61899,3.86952],"1113":["Boutonnet - Cité des Arts",43.6226,3.86814],"1114":["Saint-Éloi",43.62701,3.86573],"1115":["Université Montpellier - Triolet",43.62915,3.86157],"1116":["Hôpital Lapeyronie",43.63167,3.8526],"1117":["Occitanie Hôpitaux - Facultés",43.63464,3.84851],"1118":["Château d'Ô",43.63161,3.84305],"1119":["Malbosc - Domaine d'Ô",43.63462,3.83323],"1120":["Euromédecine",43.639,3.82768],"1121":["Hauts de Massane",43.63628,3.82266],"1122":["Saint-Paul",43.63069,3.82109],"1123":["Halles de la Paillade",43.62756,3.81748],"1541":["Place de France",43.60375,3.91573],"1765":["Stade de la Mosson",43.62125,3.81736],"2447":["Gare Sud de France",43.59705,3.92214],"1180":["Saint-Jean de Védas Centre",43.57492,3.83065],"1181":["Saint-Jean le Sec",43.57082,3.83791],"1182":["La Condamine",43.572,3.84444],"1183":["Victoire 2",43.57517,3.84988],"1184":["Sabines",43.58379,3.86017],"1185":["Villeneuve d'Angoulême",43.58878,3.86569],"1186":["Croix d'Argent",43.59241,3.86646],"1187":["Mas Drevon",43.59548,3.86788],"1188":["Lemasson",43.59364,3.87309],"1189":["Saint-Cléophas",43.5949,3.87597],"1190":["Nouveau Saint-Roch",43.59936,3.87568],"1191":["Rondelet",43.60309,3.87605],"1192":["Gare Saint-Roch",43.60448,3.87975],"1193":["Place Carnot",43.60368,3.88425],"1194":["Voltaire",43.60369,3.88911],"1195":["Rives du Lez - Consuls de Mer",43.60399,3.89397],"1196":["Pompignane",43.61258,3.89497],"1197":["Les Aubes",43.61399,3.88823],"1198":["Corum",43.61446,3.88201],"1199":["Beaux-Arts",43.61697,3.88353],"1200":["Jeu de Mail des Abbés",43.62042,3.88409],"1201":["Aiguelongue",43.62626,3.88321],"1202":["Saint-Lazare",43.62675,3.88868],"1203":["Charles de Gaulle",43.6286,3.89778],"1204":["Clairval",43.63015,3.9026],"1205":["La Galine",43.63143,3.90902],"1206":["Centurions",43.63276,3.91572],"1207":["Notre-Dame de Sablassou",43.63422,3.92228],"1210":["Aube Rouge",43.63856,3.92485],"1211":["Via Domitia",43.64674,3.9295],"1212":["Georges Pompidou",43.64932,3.92104],"1213":["Jacou",43.65452,3.9128],"1215":["Georges Pompidou",43.64931,3.921],"1216":["Via Domitia",43.64671,3.92941],"1217":["Aube Rouge",43.63855,3.92482],"1219":["Notre-Dame de Sablassou",43.63424,3.92226],"1220":["Centurions",43.6328,3.91571],"1221":["La Galine",43.63146,3.90901],"1222":["Clairval",43.63018,3.90259],"1223":["Charles de Gaulle",43.62863,3.89775],"1224":["Saint-Lazare",43.62677,3.88866],"1225":["Aiguelongue",43.62629,3.8832],"1226":["Jeu de Mail des Abbés",43.6204,3.88404],"1227":["Beaux-Arts",43.61699,3.88349],"1228":["Corum",43.61443,3.88203],"1229":["Les Aubes",43.61395,3.88822],"1230":["Pompignane",43.61259,3.89492],"1232":["Rives du Lez - Consuls de Mer",43.60402,3.89396],"1233":["Voltaire",43.60372,3.8891],"1234":["Place Carnot",43.6037,3.88428],"1235":["Gare Saint-Roch",43.6045,3.87972],"1236":["Rondelet",43.60311,3.87607],"1237":["Nouveau Saint-Roch",43.59936,3.87563],"1238":["Saint-Cléophas",43.59492,3.87593],"1239":["Lemasson",43.59365,3.87312],"1240":["Mas Drevon",43.59551,3.86783],"1241":["Croix d'Argent",43.5924,3.86642],"1242":["Villeneuve d'Angoulême",43.58878,3.86565],"1243":["Sabines",43.58378,3.86014],"1245":["Victoire 2",43.5752,3.84984],"1246":["La Condamine",43.57159,3.8442],"1247":["Saint-Jean le Sec",43.57089,3.83792],"1693":["Juvignac",43.61746,3.81005],"1694":["Mosson",43.61623,3.81959],"1695":["Celleneuve",43.61556,3.8259],"1696":["Pilory",43.61953,3.83205],"1697":["Hôtel du Département",43.62194,3.83505],"1698":["Pergola",43.61747,3.83972],"1699":["Tonnelles",43.61349,3.83965],"1700":["Jules Guesde",43.61137,3.84671],"1701":["Astruc",43.61024,3.85493],"1702":["Les Arceaux",43.60987,3.86244],"1703":["Plan Cabanes",43.60854,3.86809],"1704":["Gambetta",43.60555,3.874],"1705":["Observatoire",43.60636,3.87675],"1706":["Gare Saint-Roch - République",43.60524,3.8797],"1707":["Saint-Martin - Le Jam",43.59215,3.88035],"1708":["Restanque",43.59034,3.8851],"1710":["La Rauze",43.59351,3.89594],"1711":["Georges Frêche - Hôtel de Ville",43.59943,3.89502],"1712":["Pablo Picasso",43.59774,3.90346],"2599":["Boirargues",43.58538,3.92018],"2603":["Soriech",43.58263,3.92575],"1714":["EcoPôle",43.57805,3.93513],"1715":["Parc Expo",43.57287,3.94573],"1716":["Pérols Centre",43.56539,3.95731],"1718":["Cougourlude",43.57134,3.91403],"1719":["Pérols Étang de l'Or",43.55789,3.96367],"1720":["Pérols Centre",43.56543,3.9574],"1721":["Parc Expo",43.57288,3.94574],"1722":["EcoPôle",43.57807,3.93515],"2604":["Soriech",43.58266,3.92577],"2598":["Boirargues",43.5854,3.9202],"1724":["Pablo Picasso",43.5978,3.90362],"1725":["Georges Frêche - Hôtel de Ville",43.59946,3.89499],"1726":["La Rauze",43.59354,3.89593],"1728":["Restanque",43.59037,3.88511],"1729":["Saint-Martin - Le Jam",43.59217,3.88037],"1730":["Gare Saint-Roch - République",43.60522,3.87967],"1731":["Observatoire",43.60639,3.87677],"1732":["Gambetta - Chaptal",43.60628,3.87266],"1733":["Plan Cabanes",43.60857,3.86811],"1734":["Les Arceaux",43.61,3.86157],"1735":["Astruc",43.61027,3.85493],"1736":["Jules Guesde",43.61139,3.84673],"1737":["Tonnelles",43.61351,3.83965],"1738":["Pergola",43.61824,3.83914],"1739":["Hôtel du Département",43.62197,3.83501],"1740":["Pilory",43.61955,3.83202],"1741":["Celleneuve",43.61556,3.82586],"1742":["Mosson",43.61626,3.81969],"1743":["Lattes Centre",43.57068,3.90515],"1744":["Cougourlude",43.57132,3.91403],"1948":["Albert 1er - Jardin des Plantes",43.61477,3.87375],"1945":["Peyrou - Arc de Triomphe",43.61165,3.87234],"1951":["Saint-Guilhem - Courreau",43.60799,3.87369],"1947":["Garcia Lorca",43.59101,3.89078],"2027":["Garcia Lorca",43.5912,3.89107],"2024":["Garcia Lorca",43.59118,3.89109],"1949":["Albert 1er - Jardin des Plantes",43.61478,3.87371],"1950":["Peyrou - Arc de Triomphe",43.61165,3.87229],"1952":["Saint-Guilhem - Courreau",43.60798,3.87365],"1946":["Garcia Lorca",43.59099,3.8908],"2458":["Clapiers",43.6537,3.87275],"2459":["Montferrier-sur-Lez",43.6514,3.8673],"2460":["Agropolis",43.64595,3.86856],"2461":["Plan des 4 Seigneurs",43.64421,3.86109],"2462":["CNRS - Zoo de Lunaret",43.6382,3.86585],"2463":["Pôle Chimie Balard",43.63399,3.86791],"2464":["Université Paul Valéry",43.62997,3.8696],"2465":["Saint-Eloi - Docteur Pezet",43.6271,3.86669],"2467":["Parc Clémenceau",43.60352,3.87233],"2468":["Place du 8 Mai 1945",43.60128,3.86803],"2469":["Cité Créative - Parc Montcalm",43.60168,3.86201],"2470":["Chamberte - Les Roses",43.60263,3.85457],"2471":["Estanove",43.60071,3.84932],"2472":["Yves du Manoir",43.59505,3.84986],"2473":["Ovalie",43.59141,3.84765],"2474":["Parc Bagatelle",43.59365,3.84226],"2475":["Parc Font-Colombe",43.59544,3.83715],"2476":["Parc des Bouisses",43.59304,3.82949],"2477":["Grés de Montpellier",43.59296,3.82351],"2478":["Grés de Montpellier",43.59293,3.82351],"2479":["Parc des Bouisses",43.59301,3.8295],"2480":["Parc Font-Colombe",43.5954,3.83722],"2481":["Parc Bagatelle",43.59362,3.84224],"2482":["Ovalie",43.59139,3.84766],"2483":["Yves du Manoir",43.59507,3.84991],"2484":["Estanove",43.60068,3.84933],"2485":["Chamberte - Les Roses",43.6026,3.85459],"2486":["Cité Créative - Parc Montcalm",43.60164,3.862],"2487":["Place du 8 Mai 1945",43.60125,3.86806],"2488":["Parc Clémenceau",43.60312,3.87174],"2489":["Gambetta - Saint-Denis",43.605,3.87446],"2490":["Saint-Eloi - Docteur Pezet",43.62699,3.86661],"2491":["Université Paul Valéry",43.62997,3.86964],"2492":["Pôle Chimie Balard",43.63399,3.86796],"2493":["CNRS - Zoo de Lunaret",43.63822,3.86589],"2494":["Plan des 4 Seigneurs",43.64419,3.86112],"2495":["Agropolis",43.64595,3.86859],"2496":["Montferrier-sur-Lez",43.65137,3.86732]};
-var TRIPS  = null; // chargé async
+var TRIPS  = null;
+var DIR_LABELS = {"1":{"1":"Mosson","0":"Gare Sud France"},"10":{"1":"Cim St Lazare","0":"Celleneuve"},"11":{"0":"Tournezy","1":"La Martelle"},"13":{"1":"Occitanie Via Aig","0":"Ch Gaulle Via Aig"},"14":{"1":"Leon Blum","0":"Pl. de L'Europe"},"15":{"1":"Gare Sud France","0":"Sabines"},"16":{"1":"Ch. de Gaulle","0":"Port Marianne"},"17":{"0":"Gare Saint-Roch","1":"Les Bouisses"},"19":{"0":"H. Departement","1":"Coubertin"},"2":{"0":"Jacou","1":"St-Jean de Vedas"},"3":{"1":"Perols Etang","0":"Juvignac"},"4":{"1":"Garcia Lorca B","0":"Garcia Lorca A"},"5":{"1":"Gres de Montp.","0":"Clapiers"},"52":{"1":"Place de France","0":"Cim. St-Etienne"},"53":{"1":"Sabines","0":"Saint-Cleophas"},"6":{"1":"ALBERT 1er JARDIN","0":"Euromedecine"},"7":{"0":"ALBERT 1er JARDIN","1":"H. Departement"},"8":{"0":"Gare Saint-Roch","1":"Centrayrargues"},"A":{"1":"Pl. de L'Europe","0":"Nd de Sablassou"},"27":{"1":"Montaud","0":"Baillargues"},"28":{"1":"Boirargues","0":"Perols Cabanes"},"31":{"1":"Nd de Sablassou","0":"Baillargues"},"35":{"1":"Ch. de Gaulle","0":"Aube Rouge"},"42":{"1":"Mosson","0":"Rouviere Longue"}};
 
-var TRAM_IDS = Object.keys(ROUTES).filter(function(k){ return ROUTES[k].type===0; });
-var BUS_IDS  = Object.keys(ROUTES).filter(function(k){ return ROUTES[k].type!==0; });
+var TRAM_IDS = Object.keys(ROUTES).filter(function(k){return ROUTES[k].type===0;});
+var BUS_IDS  = Object.keys(ROUTES).filter(function(k){return ROUTES[k].type!==0;});
 
-// ═══════════════════════════════════════
+// ═══════════════════════════════
 // THÈME
-// ═══════════════════════════════════════
-(function(){ if(localStorage.getItem('tam-theme')==='light') document.documentElement.classList.add('light'); })();
+// ═══════════════════════════════
+(function(){if(localStorage.getItem('tam-theme')==='light')document.documentElement.classList.add('light');})();
 function toggleTheme(){
   var l=document.documentElement.classList.toggle('light');
   localStorage.setItem('tam-theme',l?'light':'dark');
   document.getElementById('ticon').textContent=l?'🌙':'☀️';
   document.getElementById('tlbl').textContent=l?'DARK':'LIGHT';
-  if(mapObj){
-    if(l){mapObj.removeLayer(window._DT);window._LT.addTo(mapObj);}
-    else {mapObj.removeLayer(window._LT);window._DT.addTo(mapObj);}
-  }
+  if(mapObj){l?(mapObj.removeLayer(window._DT),window._LT.addTo(mapObj)):(mapObj.removeLayer(window._LT),window._DT.addTo(mapObj));}
 }
-(function(){
-  var l=document.documentElement.classList.contains('light');
-  document.getElementById('ticon').textContent=l?'🌙':'☀️';
-  document.getElementById('tlbl').textContent=l?'DARK':'LIGHT';
-})();
+(function(){var l=document.documentElement.classList.contains('light');document.getElementById('ticon').textContent=l?'🌙':'☀️';document.getElementById('tlbl').textContent=l?'DARK':'LIGHT';})();
 
-// ═══════════════════════════════════════
+// ═══════════════════════════════
 // CONFIG
-// ═══════════════════════════════════════
-var GTFS_URL   = 'https://tam-montpellier.jade-renaut.workers.dev';
-var TRIPS_URL  = 'gtfs_trips.json';
-var REFRESH_MS = 10000;
+// ═══════════════════════════════
+var GTFS_URL  ='https://tam-montpellier.jade-renaut.workers.dev';
+var TRIPS_URL ='gtfs_trips.json';
+var REFRESH_MS=10000;
+var mapObj,FeedMsg;
+var markers={},vehicles=[],stopMarkers=[],stopsVisible=false,interval=null;
 
-var mapObj, FeedMsg;
-var markers    = {};
-var vehicles   = [];
-var stopMarkers= [], stopsVisible=false;
-var interval   = null;
+// Vue globale : 'all' | 'tram' | 'bus'
+var activeView='all';
 
-// Vue: 'all' | 'tram' | 'bus' | 'pick'
-var activeView = 'all';
-// Mode pick: {rid: {0: bool, 1: bool}}  (true = visible)
-var pickState  = {};
+// État directions : pickState[rid][dir] = bool
+// toujours actif (pas de mode séparé)
+var pickState={};
 
-// ═══════════════════════════════════════
+// ═══════════════════════════════
 // PROTO
-// ═══════════════════════════════════════
+// ═══════════════════════════════
 var PROTO=`syntax="proto2";
 message FeedMessage{required FeedHeader header=1;repeated FeedEntity entity=2;}
 message FeedHeader{required string gtfs_realtime_version=1;optional uint64 timestamp=3;}
@@ -267,106 +259,82 @@ message VehiclePosition{optional TripDescriptor trip=1;optional Position positio
 message TripDescriptor{optional string trip_id=1;optional string route_id=5;}
 message Position{required float latitude=1;required float longitude=2;optional float bearing=3;optional float speed=4;}`;
 
-// ═══════════════════════════════════════
+// ═══════════════════════════════
 // UTILS
-// ═══════════════════════════════════════
-function loadScript(src){
-  return new Promise(function(r,j){var s=document.createElement('script');s.src=src;s.onload=r;s.onerror=j;document.head.appendChild(s);});
-}
-function xhrBin(url,ms){
-  return new Promise(function(r,j){
-    var x=new XMLHttpRequest();x.open('GET',url,true);x.responseType='arraybuffer';x.timeout=ms||12000;
-    x.ontimeout=function(){j(new Error('Timeout'));};x.onerror=function(){j(new Error('Réseau KO'));};
-    x.onload=function(){x.status>=200&&x.status<300?r(x.response):j(new Error('HTTP '+x.status));};x.send();
-  });
-}
-function xhrJSON(url){
-  return new Promise(function(r,j){
-    var x=new XMLHttpRequest();x.open('GET',url,true);x.timeout=25000;
-    x.ontimeout=function(){j(new Error('Timeout'));};x.onerror=function(){j(new Error('KO'));};
-    x.onload=function(){x.status>=200&&x.status<300?r(JSON.parse(x.responseText)):j(new Error('HTTP '+x.status));};x.send();
-  });
+// ═══════════════════════════════
+function loadScript(src){return new Promise(function(r,j){var s=document.createElement('script');s.src=src;s.onload=r;s.onerror=j;document.head.appendChild(s);});}
+function xhrBin(url,ms){return new Promise(function(r,j){var x=new XMLHttpRequest();x.open('GET',url,true);x.responseType='arraybuffer';x.timeout=ms||12000;x.ontimeout=function(){j(new Error('Timeout'));};x.onerror=function(){j(new Error('KO'));};x.onload=function(){x.status>=200&&x.status<300?r(x.response):j(new Error('HTTP '+x.status));};x.send();});}
+function xhrJSON(url){return new Promise(function(r,j){var x=new XMLHttpRequest();x.open('GET',url,true);x.timeout=25000;x.ontimeout=function(){j(new Error('Timeout'));};x.onerror=function(){j(new Error('KO'));};x.onload=function(){x.status>=200&&x.status<300?r(JSON.parse(x.responseText)):j(new Error('HTTP '+x.status));};x.send();});}
+
+function getInfo(tripId,routeId){
+  var rid=(routeId&&ROUTES[routeId])?routeId:null;
+  var headsign=null,dir=-1;
+  if(TRIPS&&tripId&&TRIPS.t[tripId]){var e=TRIPS.t[tripId];if(!rid&&e[0]>=0)rid=TRIPS.k[e[0]];headsign=e[1];dir=e[2];}
+  return{rid:rid,headsign:headsign,dir:dir};
 }
 
-function getInfo(tripId, routeId){
-  var rid = (routeId && ROUTES[routeId]) ? routeId : null;
-  var headsign=null, dir=-1;
-  if(TRIPS && tripId && TRIPS.t[tripId]){
-    var e=TRIPS.t[tripId];
-    if(!rid && e[0]>=0) rid=TRIPS.k[e[0]];
-    headsign=e[1]; dir=e[2];
-  }
-  return {rid:rid, headsign:headsign, dir:dir};
-}
-
-// ═══════════════════════════════════════
+// ═══════════════════════════════
 // VISIBILITÉ
-// ═══════════════════════════════════════
+// ═══════════════════════════════
 function isVisible(v){
-  if(activeView==='all')  return true;
-  if(!v.rid) return false;
-  var isTram = TRAM_IDS.indexOf(v.rid)>=0;
-  if(activeView==='tram') return isTram;
-  if(activeView==='bus')  return !isTram;
-  if(activeView==='pick'){
-    var ps = pickState[v.rid];
-    if(!ps) return false;
-    // dir=-1 signifie inconnu -> on montre si au moins un sens activé
-    if(v.dir===-1) return ps[0]||ps[1];
-    return !!ps[v.dir];
-  }
-  return false;
+  if(!v.rid) return activeView==='all';
+  var isTram=TRAM_IDS.indexOf(v.rid)>=0;
+  // Filtre vue globale
+  if(activeView==='tram'&&!isTram) return false;
+  if(activeView==='bus' && isTram) return false;
+  // Filtre direction
+  var ps=pickState[v.rid];
+  if(!ps) return true;
+  if(v.dir===-1) return ps[0]||ps[1];
+  return !!ps[v.dir];
 }
 
-// ═══════════════════════════════════════
-// CONSTRUCTION SIDEBAR
-// ═══════════════════════════════════════
+// ═══════════════════════════════
+// SIDEBAR
+// ═══════════════════════════════
 function buildSidebar(){
-  buildSection('sec-tram', TRAM_IDS);
-  buildSection('sec-bus',  BUS_IDS);
+  buildSection('sec-tram',TRAM_IDS);
+  buildSection('sec-bus', BUS_IDS);
 }
 
-function buildSection(containerId, ids){
-  var c=document.getElementById(containerId);
+function buildSection(cid,ids){
+  var c=document.getElementById(cid);
   ids.forEach(function(rid){
     var r=ROUTES[rid]; if(!r) return;
     var isTram=r.type===0;
-    var sqClass=isTram?'':' sq';
-
-    // État pick initial: tout visible
+    // État initial : tout visible
     pickState[rid]={0:true,1:true};
 
-    var row=document.createElement('div');
-    row.className='route-row sel'; row.id='rrow-'+rid;
+    var block=document.createElement('div');
+    block.className='route-block'; block.id='rblock-'+rid;
 
-    // Tête cliquable (toggle tout le sens en mode pick)
+    // En-tête : clic = toggle les 2 dirs
     var head=document.createElement('button');
-    head.className='route-head'; head.dataset.rid=rid;
+    head.className='route-head';
     head.innerHTML=
-      '<div class="rbadge'+sqClass+'" style="background:'+r.color+';color:'+r.text+'">'+r.short+'</div>'+
+      '<div class="rbadge'+(isTram?' circ':' sq')+'" style="background:'+r.color+';color:'+r.text+'">'+r.short+'</div>'+
       '<span class="rname">'+r.long+'</span>'+
       '<span class="rcount" id="rc-'+rid+'">–</span>';
-    head.onclick=function(){ if(activeView==='pick') toggleRouteAll(rid); };
+    head.onclick=function(){toggleRouteAll(rid);};
 
-    // Sous-lignes directions (apparaissent seulement en mode pick)
-    var dirList=document.createElement('div');
-    dirList.className='dir-list'; dirList.id='dirs-'+rid; dirList.style.display='none';
-
-    // On crée 2 boutons direction (remplis quand TRIPS est chargé)
+    // Directions
+    var dl=document.createElement('div');
+    dl.className='dir-list'; dl.id='dirs-'+rid;
     [0,1].forEach(function(d){
       var db=document.createElement('button');
-      db.className='dir-btn dir-on'; db.id='dir-'+rid+'-'+d;
+      db.className='dir-btn on'; db.id='dir-'+rid+'-'+d;
+      var dlbl = (DIR_LABELS[rid]&&DIR_LABELS[rid][d]!==undefined) ? DIR_LABELS[rid][d] : (d===0?'→ A':'← B');
       db.innerHTML=
-        '<span class="dir-arrow">'+(d===0?'→':'←')+'</span>'+
-        '<span class="dir-label" id="dirl-'+rid+'-'+d+'">Direction '+d+'</span>'+
-        '<span class="dir-count" id="dirc-'+rid+'-'+d+'">–</span>';
-      db.onclick=function(e){ e.stopPropagation(); if(activeView==='pick') toggleDir(rid,d); };
-      dirList.appendChild(db);
+        '<div class="dir-pip" id="dip-'+rid+'-'+d+'" style="background:'+r.color+'"></div>'+
+        '<span class="dir-lbl" id="dirl-'+rid+'-'+d+'">'+dlbl+'</span>'+
+        '<span class="dir-ct"  id="dirc-'+rid+'-'+d+'">–</span>';
+      db.onclick=function(e){e.stopPropagation();toggleDir(rid,d);};
+      dl.appendChild(db);
     });
 
-    row.appendChild(head);
-    row.appendChild(dirList);
-    c.appendChild(row);
+    block.appendChild(head);
+    block.appendChild(dl);
+    c.appendChild(block);
   });
 }
 
@@ -376,64 +344,65 @@ function fillDirLabels(){
     var dirs=TRIPS.d[rid];
     [0,1].forEach(function(d){
       var el=document.getElementById('dirl-'+rid+'-'+d);
-      if(el && dirs[d]) el.textContent=dirs[d];
+      if(el&&dirs[d]) el.textContent=dirs[d];
     });
   });
 }
 
-// ═══════════════════════════════════════
-// VUES
-// ═══════════════════════════════════════
+// ═══════════════════════════════
+// ACTIONS FILTRE
+// ═══════════════════════════════
 function setView(v){
   activeView=v;
-  ['all','tram','bus','pick'].forEach(function(t){
-    document.getElementById('tab-'+t).classList.toggle('on',t===v);
-  });
-  var pa=document.getElementById('pick-actions');
-  pa.classList.toggle('show', v==='pick');
-
-  // Afficher/masquer les boutons direction + pointer-events
-  document.querySelectorAll('.route-head').forEach(function(h){
-    h.style.cursor=(v==='pick')?'pointer':'default';
-  });
-  document.querySelectorAll('.dir-list').forEach(function(dl){
-    dl.style.display=(v==='pick')?'':'none';
-  });
-  // Remettre l'opacité
-  document.querySelectorAll('.route-row').forEach(function(rr){
-    rr.classList.remove('off'); rr.classList.add('sel');
-  });
+  ['all','tram','bus'].forEach(function(t){document.getElementById('tab-'+t).classList.toggle('on',t===v);});
+  // Si on passe en TRAM : décocher les bus, cocher les trams
+  // Si on passe en BUS  : décocher les trams, cocher les bus
+  // Si TOUT : tout cocher
+  if(v==='tram'){
+    TRAM_IDS.forEach(function(rid){setRouteState(rid,true,true);});
+    BUS_IDS.forEach(function(rid){setRouteState(rid,false,false);});
+  } else if(v==='bus'){
+    BUS_IDS.forEach(function(rid){setRouteState(rid,true,true);});
+    TRAM_IDS.forEach(function(rid){setRouteState(rid,false,false);});
+  } else {
+    Object.keys(pickState).forEach(function(rid){setRouteState(rid,true,true);});
+  }
   updateMarkers();
+}
+
+function setRouteState(rid,d0,d1){
+  if(!pickState[rid]) pickState[rid]={};
+  pickState[rid][0]=d0; pickState[rid][1]=d1;
+  refreshBlockStyle(rid);
 }
 
 function toggleRouteAll(rid){
   var ps=pickState[rid];
-  // Si au moins un est ON -> tout OFF, sinon tout ON
-  var anyOn = ps[0]||ps[1];
-  ps[0]=ps[1]=!anyOn;
-  refreshRowStyle(rid);
-  updateMarkers();
-}
-function toggleDir(rid, d){
-  pickState[rid][d]=!pickState[rid][d];
-  refreshRowStyle(rid);
-  updateMarkers();
-}
-function refreshRowStyle(rid){
-  var ps=pickState[rid];
-  var row=document.getElementById('rrow-'+rid);
   var anyOn=ps[0]||ps[1];
-  if(row){ row.classList.toggle('off',!anyOn); row.classList.toggle('sel',anyOn); }
+  setRouteState(rid,!anyOn,!anyOn);
+  updateMarkers();
+}
+
+function toggleDir(rid,d){
+  pickState[rid][d]=!pickState[rid][d];
+  refreshBlockStyle(rid);
+  updateMarkers();
+}
+
+function refreshBlockStyle(rid){
+  var ps=pickState[rid];
+  var block=document.getElementById('rblock-'+rid);
+  if(block) block.classList.toggle('off',!ps[0]&&!ps[1]);
   [0,1].forEach(function(d){
     var db=document.getElementById('dir-'+rid+'-'+d);
-    if(db){ db.classList.toggle('dir-on',ps[d]); db.classList.toggle('dir-off',!ps[d]); }
+    if(db){db.classList.toggle('on',ps[d]);}
   });
 }
+
 function selectAll(val){
-  Object.keys(pickState).forEach(function(rid){
-    pickState[rid][0]=val; pickState[rid][1]=val;
-    refreshRowStyle(rid);
-  });
+  // Respecte la vue courante : ne coche que ce qui est pertinent
+  var ids=activeView==='tram'?TRAM_IDS:activeView==='bus'?BUS_IDS:Object.keys(pickState);
+  ids.forEach(function(rid){setRouteState(rid,val,val);});
   updateMarkers();
 }
 
@@ -442,12 +411,12 @@ function toggleSec(id){
   var arr=document.getElementById(id+'-arr');
   var hidden=body.style.display==='none';
   body.style.display=hidden?'':'none';
-  if(arr) arr.classList.toggle('closed',!hidden);
+  if(arr)arr.classList.toggle('closed',!hidden);
 }
 
-// ═══════════════════════════════════════
+// ═══════════════════════════════
 // ARRÊTS
-// ═══════════════════════════════════════
+// ═══════════════════════════════
 function buildStopMarkers(){
   Object.values(STOPS).forEach(function(s){
     var icon=L.divIcon({className:'',html:'<div class="sdot"></div>',iconSize:[7,7],iconAnchor:[3.5,3.5]});
@@ -459,12 +428,12 @@ function buildStopMarkers(){
 function toggleStops(){
   stopsVisible=!stopsVisible;
   document.getElementById('stops-btn').classList.toggle('on',stopsVisible);
-  stopMarkers.forEach(function(m){ stopsVisible?m.addTo(mapObj):mapObj.removeLayer(m); });
+  stopMarkers.forEach(function(m){stopsVisible?m.addTo(mapObj):mapObj.removeLayer(m);});
 }
 
-// ═══════════════════════════════════════
+// ═══════════════════════════════
 // BOOTSTRAP
-// ═══════════════════════════════════════
+// ═══════════════════════════════
 async function bootstrap(){
   try{
     setTxt('Chargement Leaflet…');
@@ -487,113 +456,87 @@ async function bootstrap(){
     var root=protobuf.parse(PROTO,{keepCase:true}).root;
     FeedMsg=root.lookupType('FeedMessage');
 
-    // Trips en arrière-plan
     xhrJSON(TRIPS_URL).then(function(d){
       TRIPS=d; fillDirLabels();
-      vehicles.forEach(function(v){
-        if(markers[v.id]){try{var p=markers[v.id].getPopup();if(p)p.setContent(mkPopup(v));}catch(e){}}
-      });
-    }).catch(function(e){console.warn('trips non chargés:',e.message);});
+      vehicles.forEach(function(v){if(markers[v.id]){try{var p=markers[v.id].getPopup();if(p)p.setContent(mkPopup(v));}catch(e){}}});
+    }).catch(function(e){console.warn('trips:',e.message);});
 
     setTxt('Récupération des véhicules…');
     await fetchVehicles();
     document.getElementById('refresh-btn').disabled=false;
     interval=setInterval(fetchVehicles,REFRESH_MS);
-  }catch(err){
-    console.error(err);setStatus('error');hideOverlay();showErr('Erreur: '+err.message);
-  }
+  }catch(err){console.error(err);setStatus('error');hideOverlay();showErr('Erreur: '+err.message);}
 }
 
-// ═══════════════════════════════════════
-// FETCH TEMPS RÉEL
-// ═══════════════════════════════════════
+// ═══════════════════════════════
+// FETCH
+// ═══════════════════════════════
 async function fetchVehicles(){
-  setStatus('loading'); hideErr();
+  setStatus('loading');hideErr();
   try{
     var buf=await xhrBin(GTFS_URL,12000);
     var msg=FeedMsg.decode(new Uint8Array(buf));
-    vehicles=(msg.entity||[])
-      .filter(function(e){return e.vehicle&&e.vehicle.position;})
-      .map(function(e){
-        var v=e.vehicle;
-        var tid=(v.trip&&v.trip.trip_id)||'';
-        var rid=(v.trip&&v.trip.route_id)||'';
-        var info=getInfo(tid,rid);
-        return{id:e.id,tripId:tid,lat:v.position.latitude,lng:v.position.longitude,
-               bearing:v.position.bearing||0,speed:v.position.speed||0,
-               rid:info.rid,headsign:info.headsign,dir:info.dir,
-               label:v.label||e.id,ts:v.timestamp||0};
-      });
+    vehicles=(msg.entity||[]).filter(function(e){return e.vehicle&&e.vehicle.position;}).map(function(e){
+      var v=e.vehicle,tid=(v.trip&&v.trip.trip_id)||'',rid=(v.trip&&v.trip.route_id)||'';
+      var info=getInfo(tid,rid);
+      return{id:e.id,tripId:tid,lat:v.position.latitude,lng:v.position.longitude,
+             bearing:v.position.bearing||0,speed:v.position.speed||0,
+             rid:info.rid,headsign:info.headsign,dir:info.dir,label:v.label||e.id,ts:v.timestamp||0};
+    });
     updateMarkers();updateStats();updateCounts();
     setStatus('live');hideOverlay();restartTimer();
-  }catch(err){
-    console.error(err);setStatus('error');hideOverlay();showErr('Erreur: '+err.message);
-  }
+  }catch(err){console.error(err);setStatus('error');hideOverlay();showErr('Erreur: '+err.message);}
 }
 
-// ═══════════════════════════════════════
+// ═══════════════════════════════
 // MARQUEURS
-// ═══════════════════════════════════════
+// ═══════════════════════════════
 function mkIcon(v){
   var r=v.rid?ROUTES[v.rid]:null;
-  var color=r?r.color:'#6b7280', tc=r?r.text:'#fff';
-  var isTram=r&&r.type===0;
-  var lbl=r?r.short:'?', sz=isTram?32:26;
+  var color=r?r.color:'#6b7280',tc=r?r.text:'#fff';
+  var isTram=r&&r.type===0,lbl=r?r.short:'?',sz=isTram?32:26;
   var dark=(tc==='#000'||tc==='#000000')?' dk':'';
-  var busC=isTram?'':' bus';
-  return L.divIcon({
-    className:'',
+  return L.divIcon({className:'',
     html:'<div class="vw" style="transform:rotate('+v.bearing+'deg)">'+
          '<div class="va"></div>'+
-         '<div class="vm'+busC+dark+'" style="width:'+sz+'px;height:'+sz+'px;background:'+color+'">'+lbl+'</div>'+
+         '<div class="vm'+(isTram?'':' bus')+dark+'" style="width:'+sz+'px;height:'+sz+'px;background:'+color+'">'+lbl+'</div>'+
          '</div>',
-    iconSize:[sz,sz+6],iconAnchor:[sz/2,sz/2+6]
-  });
+    iconSize:[sz,sz+6],iconAnchor:[sz/2,sz/2+6]});
 }
 
 function mkPopup(v){
   var r=v.rid?ROUTES[v.rid]:null;
-  var color=r?r.color:'#6b7280', tc=r?r.text:'#fff';
-  var isTram=r&&r.type===0;
-  var lbl=r?r.short:'?', lname=r?'Ligne '+r.short:'Véhicule';
-  var llong=r?r.long:'';
+  var color=r?r.color:'#6b7280',tc=r?r.text:'#fff';
+  var isTram=r&&r.type===0,lbl=r?r.short:'?';
+  var lname=r?'Ligne '+r.short:'Véhicule',llong=r?r.long:'';
   var time=v.ts?new Date(v.ts*1000).toLocaleTimeString('fr-FR'):'–';
   var spd=v.speed>0.5?Math.round(v.speed*3.6):0;
-  var spdStr=spd>0?spd+' km/h':'À l\'arrêt';
-  var spdPct=Math.min(100,Math.round(spd/70*100));
-  // Direction label depuis TRIPS.d
   var dirLabel='';
-  if(v.dir>=0 && TRIPS && TRIPS.d && TRIPS.d[v.rid] && TRIPS.d[v.rid][v.dir]){
-    dirLabel=TRIPS.d[v.rid][v.dir];
-  } else if(v.headsign){ dirLabel=v.headsign; }
-  var hsHtml=dirLabel?'<div class="phs">→ '+dirLabel+'</div>':'';
+  if(v.dir>=0&&TRIPS&&TRIPS.d&&TRIPS.d[v.rid]&&TRIPS.d[v.rid][v.dir])dirLabel=TRIPS.d[v.rid][v.dir];
+  else if(v.headsign)dirLabel=v.headsign;
   var sqC=isTram?'':' sq';
   return '<div>'+
     '<div class="ph">'+
       '<div class="pbadge'+sqC+'" style="background:'+color+';color:'+tc+'">'+lbl+'</div>'+
       '<div><div class="ptitle">'+lname+'</div>'+
-      (llong?'<div class="plong">'+llong+'</div>':'')+hsHtml+'</div>'+
-    '</div>'+
-    '<div class="prow"><span class="pkey">'+(isTram?'🚊 Tramway':'🚌 Bus')+'</span><span class="pval">#'+v.label+'</span></div>'+
-    '<div class="prow"><span class="pkey">Vitesse</span><span class="pval">'+spdStr+'</span></div>'+
-    (spdPct>0?'<div class="spdb"><div class="spdf" style="width:'+spdPct+'%;background:'+color+'"></div></div>':'')+
+      (llong?'<div class="plong">'+llong+'</div>':'')+
+      (dirLabel?'<div class="phs">→ '+dirLabel+'</div>':'')+
+      '</div></div>'+
+    '<div class="prow"><span class="pkey">'+(isTram?'🚊 Tram':'🚌 Bus')+'</span><span class="pval">#'+v.label+'</span></div>'+
+    '<div class="prow"><span class="pkey">Vitesse</span><span class="pval">'+(spd>0?spd+' km/h':'À l\'arrêt')+'</span></div>'+
+    (spd>0?'<div class="spdb"><div class="spdf" style="width:'+Math.min(100,Math.round(spd/70*100))+'%;background:'+color+'"></div></div>':'')+
     '<div class="prow"><span class="pkey">Cap</span><span class="pval">'+Math.round(v.bearing)+'°</span></div>'+
     '<div class="prow"><span class="pkey">MAJ</span><span class="pval">'+time+'</span></div>'+
     '</div>';
 }
 
 function updateMarkers(){
-  var ids={};
-  vehicles.forEach(function(v){ids[v.id]=true;});
-  Object.keys(markers).forEach(function(id){
-    if(!ids[id]){mapObj.removeLayer(markers[id]);delete markers[id];}
-  });
+  var ids={};vehicles.forEach(function(v){ids[v.id]=true;});
+  Object.keys(markers).forEach(function(id){if(!ids[id]){mapObj.removeLayer(markers[id]);delete markers[id];}});
   vehicles.forEach(function(v){
-    var vis=isVisible(v);
-    var icon=mkIcon(v);
+    var vis=isVisible(v),icon=mkIcon(v);
     if(markers[v.id]){
-      markers[v.id].setLatLng([v.lat,v.lng]);
-      markers[v.id].setIcon(icon);
+      markers[v.id].setLatLng([v.lat,v.lng]);markers[v.id].setIcon(icon);
       try{var p=markers[v.id].getPopup();if(p)p.setContent(mkPopup(v));}catch(e){}
     }else{
       var m=L.marker([v.lat,v.lng],{icon:icon,zIndexOffset:100});
@@ -605,62 +548,45 @@ function updateMarkers(){
   });
 }
 
-// ═══════════════════════════════════════
-// STATS & COUNTS
-// ═══════════════════════════════════════
+// ═══════════════════════════════
+// STATS
+// ═══════════════════════════════
 function updateStats(){
   var tr=0,bu=0;
-  vehicles.forEach(function(v){
-    if(!v.rid)return;
-    TRAM_IDS.indexOf(v.rid)>=0?tr++:bu++;
-  });
+  vehicles.forEach(function(v){if(!v.rid)return;TRAM_IDS.indexOf(v.rid)>=0?tr++:bu++;});
   document.getElementById('st-tram').textContent=tr;
   document.getElementById('st-bus').textContent=bu;
   document.getElementById('st-upd').textContent=new Date().toLocaleTimeString('fr-FR');
   document.getElementById('vehicle-count').textContent=vehicles.length+' véhicules';
 }
-
 function updateCounts(){
-  // Compter par (rid, dir)
   var c={};
   vehicles.forEach(function(v){
     if(!v.rid)return;
     if(!c[v.rid])c[v.rid]={0:0,1:0,tot:0};
     c[v.rid].tot++;
-    if(v.dir===0)c[v.rid][0]++;
-    else if(v.dir===1)c[v.rid][1]++;
+    if(v.dir===0)c[v.rid][0]++;else if(v.dir===1)c[v.rid][1]++;
   });
   Object.keys(ROUTES).forEach(function(rid){
     var el=document.getElementById('rc-'+rid);
-    if(el) el.textContent=(c[rid]?c[rid].tot:0);
+    if(el)el.textContent=c[rid]?c[rid].tot:0;
     [0,1].forEach(function(d){
-      var del=document.getElementById('dirc-'+rid+'-'+d);
-      if(del) del.textContent=(c[rid]?c[rid][d]:0);
+      var de=document.getElementById('dirc-'+rid+'-'+d);
+      if(de)de.textContent=c[rid]?c[rid][d]:0;
     });
   });
 }
 
-// ═══════════════════════════════════════
+// ═══════════════════════════════
 // UI
-// ═══════════════════════════════════════
-function setStatus(s){
-  var dot=document.getElementById('sdot'),txt=document.getElementById('stxt');
-  if(s==='loading'){dot.className='dot';txt.textContent='Chargement…';}
-  else if(s==='live'){dot.className='dot live';txt.textContent='EN DIRECT';}
-  else{dot.className='dot error';txt.textContent='ERREUR';}
-}
+// ═══════════════════════════════
+function setStatus(s){var dot=document.getElementById('sdot'),txt=document.getElementById('stxt');if(s==='loading'){dot.className='dot';txt.textContent='Chargement…';}else if(s==='live'){dot.className='dot live';txt.textContent='EN DIRECT';}else{dot.className='dot error';txt.textContent='ERREUR';}}
 function setTxt(t){document.getElementById('ltxt').textContent=t;}
 function showErr(m){var b=document.getElementById('error-banner');b.innerHTML=m;b.style.display='block';}
 function hideErr(){document.getElementById('error-banner').style.display='none';}
 function hideOverlay(){document.getElementById('overlay').classList.add('hidden');}
 function manualRefresh(){clearInterval(interval);fetchVehicles();interval=setInterval(fetchVehicles,REFRESH_MS);}
-function restartTimer(){
-  var bar=document.getElementById('timer-bar');
-  bar.style.transition='none';bar.style.width='100%';
-  requestAnimationFrame(function(){requestAnimationFrame(function(){
-    bar.style.transition='width '+REFRESH_MS+'ms linear';bar.style.width='0%';
-  });});
-}
+function restartTimer(){var bar=document.getElementById('timer-bar');bar.style.transition='none';bar.style.width='100%';requestAnimationFrame(function(){requestAnimationFrame(function(){bar.style.transition='width '+REFRESH_MS+'ms linear';bar.style.width='0%';});});}
 
 bootstrap();
 </script>
