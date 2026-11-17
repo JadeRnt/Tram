@@ -237,9 +237,10 @@ function toggleTheme(){
 // CONFIG
 // ═══════════════════════════════
 var GTFS_URLS=[
-  'https://tam-montpellier.jade-renaut.workers.dev',
-  'https://www.data.gouv.fr/api/1/datasets/r/9516d4d0-c5cd-4bdd-9cb8-1e793660c683',
-  'https://www.data.gouv.fr/api/1/datasets/r/c44bc589-b954-4a8c-918d-bc555938b6ea'
+  'https://tam-montpellier.jade-renaut.workers.dev?i=0',
+  'https://tam-montpellier.jade-renaut.workers.dev?i=1',
+  'https://tam-montpellier.jade-renaut.workers.dev?i=2',
+  'https://tam-montpellier.jade-renaut.workers.dev?i=3'
 ];
 var gtfsIdx=0;
 var TRIPS_URL ='gtfs_trips.json';
@@ -487,14 +488,18 @@ async function bootstrap(){
 async function fetchVehicles(){
   setStatus('loading');hideErr();
   try{
-    var buf=null,lastErr=null;
-    for(var i=0;i<GTFS_URLS.length&&!buf;i++){
+    var msg=null,lastErr=null;
+    for(var i=0;i<GTFS_URLS.length&&!msg;i++){
       var u=GTFS_URLS[(gtfsIdx+i)%GTFS_URLS.length];
-      try{buf=await xhrBin(u,12000);gtfsIdx=(gtfsIdx+i)%GTFS_URLS.length;}
-      catch(e){lastErr=e;console.warn('flux KO:',u,e.message);}
+      try{
+        var buf=await xhrBin(u,12000);
+        var m=FeedMsg.decode(new Uint8Array(buf));
+        var n=(m.entity||[]).filter(function(e){return e.vehicle&&e.vehicle.position;}).length;
+        if(!n)throw new Error('flux sans positions');
+        msg=m;gtfsIdx=(gtfsIdx+i)%GTFS_URLS.length;
+      }catch(e){lastErr=e;console.warn('flux KO:',u,e.message);}
     }
-    if(!buf)throw lastErr||new Error('Aucune source de flux');
-    var msg=FeedMsg.decode(new Uint8Array(buf));
+    if(!msg)throw lastErr||new Error('Aucune source de flux');
     vehicles=(msg.entity||[]).filter(function(e){return e.vehicle&&e.vehicle.position;}).map(function(e){
       var v=e.vehicle,tid=(v.trip&&v.trip.trip_id)||'',rid=(v.trip&&v.trip.route_id)||'';
       var info=getInfo(tid,rid);
