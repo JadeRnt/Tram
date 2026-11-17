@@ -262,7 +262,8 @@ var PROTO=`syntax="proto2";
 message FeedMessage{required FeedHeader header=1;repeated FeedEntity entity=2;}
 message FeedHeader{required string gtfs_realtime_version=1;optional uint64 timestamp=3;}
 message FeedEntity{required string id=1;optional VehiclePosition vehicle=4;}
-message VehiclePosition{optional TripDescriptor trip=1;optional Position position=2;optional uint64 timestamp=4;optional string label=6;}
+message VehiclePosition{optional TripDescriptor trip=1;optional Position position=2;optional uint32 current_status=4;optional uint64 timestamp=5;optional VehicleDescriptor vehicle=8;}
+message VehicleDescriptor{optional string id=1;optional string label=2;}
 message TripDescriptor{optional string trip_id=1;optional string route_id=5;}
 message Position{required float latitude=1;required float longitude=2;optional float bearing=3;optional float speed=4;}`;
 
@@ -485,6 +486,21 @@ async function bootstrap(){
 // ═══════════════════════════════
 // FETCH
 // ═══════════════════════════════
+var lastPos={};
+function distM(a,b,c,d){var R=6371000,r=Math.PI/180,x=(c-a)*r,y=(d-b)*r*Math.cos((a+c)/2*r);return Math.sqrt(x*x+y*y)*R;}
+function estimateSpeed(v){
+  // vitesse du flux si renseignee, sinon estimee a partir des deplacements entre deux rafraichissements
+  if(v.speed>0.5)return v.speed;
+  var now=Date.now(),p=lastPos[v.id];
+  if(!p){lastPos[v.id]={lat:v.lat,lng:v.lng,t:now,spd:null,chg:now};return null;}
+  if(distM(p.lat,p.lng,v.lat,v.lng)>3){
+    var dt=(now-p.t)/1000;
+    p.spd=dt>0?distM(p.lat,p.lng,v.lat,v.lng)/dt:null;
+    p.lat=v.lat;p.lng=v.lng;p.t=now;p.chg=now;
+  }
+  if(p.spd===null)return (now-p.chg>45000)?0:null;
+  return (now-p.chg>45000)?0:p.spd;
+}
 async function fetchVehicles(){
   setStatus('loading');hideErr();
   try{
@@ -505,8 +521,19 @@ async function fetchVehicles(){
       var info=getInfo(tid,rid);
       return{id:e.id,tripId:tid,lat:v.position.latitude,lng:v.position.longitude,
              bearing:v.position.bearing||0,speed:v.position.speed||0,
-             rid:info.rid,headsign:info.headsign,dir:info.dir,label:v.label||e.id,ts:v.timestamp||0};
+             rid:info.rid,headsign:info.headsign,dir:info.dir,label:(v.vehicle&&(v.vehicle.label||v.vehicle.id))||e.id,ts:(v.timestamp&&v.timestamp.toNumber?v.timestamp.toNumber():Number(v.timestamp))||0};
     });
+    vehicles.forEach(function(v){v.speed=estimateSpeed(v);});
+    (function(){
+      var raw={},unk=0;
+      (msg.entity||[]).forEach(function(e){
+        if(!e.vehicle)return;
+        var rid=(e.vehicle.trip&&e.vehicle.trip.route_id)||'(vide)';
+        raw[rid]=(raw[rid]||0)+1;
+      });
+      vehicles.forEach(function(v){if(!v.rid)unk++;});
+      console.log('DIAG route_id du flux:',JSON.stringify(raw),'| vehicules sans ligne reconnue:',unk,'/',vehicles.length);
+    })();
     updateMarkers();updateStats();updateCounts();
     setStatus('live');hideOverlay();restartTimer();
   }catch(err){console.error(err);setStatus('error');hideOverlay();showErr('Erreur: '+err.message);}
@@ -534,7 +561,7 @@ function mkPopup(v){
   var isTram=r&&r.type===0,lbl=r?r.short:'?';
   var lname=r?'Ligne '+r.short:'Véhicule',llong=r?r.long:'';
   var time=v.ts?new Date(v.ts*1000).toLocaleTimeString('fr-FR'):'–';
-  var spd=v.speed>0.5?Math.round(v.speed*3.6):0;
+  var spdKnown=v.speed!==null&&v.speed!==undefined;var spd=spdKnown&&v.speed>0.5?Math.round(v.speed*3.6):0;
   var dirLabel='';
   if(v.dir>=0&&TRIPS&&TRIPS.d&&TRIPS.d[v.rid]&&TRIPS.d[v.rid][v.dir])dirLabel=TRIPS.d[v.rid][v.dir];
   else if(v.headsign)dirLabel=v.headsign;
@@ -547,7 +574,7 @@ function mkPopup(v){
       (dirLabel?'<div class="phs">→ '+dirLabel+'</div>':'')+
       '</div></div>'+
     '<div class="prow"><span class="pkey">'+(isTram?'🚊 Tram':'🚌 Bus')+'</span><span class="pval">#'+v.label+'</span></div>'+
-    '<div class="prow"><span class="pkey">Vitesse</span><span class="pval">'+(spd>0?spd+' km/h':'À l\'arrêt')+'</span></div>'+
+    '<div class="prow"><span class="pkey">Vitesse</span><span class="pval">'+(!spdKnown?'–':(spd>0?spd+' km/h':'À l\'arrêt'))+'</span></div>'+
     (spd>0?'<div class="spdb"><div class="spdf" style="width:'+Math.min(100,Math.round(spd/70*100))+'%;background:'+color+'"></div></div>':'')+
     '<div class="prow"><span class="pkey">Cap</span><span class="pval">'+Math.round(v.bearing)+'°</span></div>'+
     '<div class="prow"><span class="pkey">MAJ</span><span class="pval">'+time+'</span></div>'+
