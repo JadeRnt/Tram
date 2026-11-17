@@ -275,10 +275,15 @@ function loadScript(src){return new Promise(function(r,j){var s=document.createE
 function xhrBin(url,ms){return new Promise(function(r,j){var x=new XMLHttpRequest();x.open('GET',url,true);x.responseType='arraybuffer';x.timeout=ms||12000;x.ontimeout=function(){j(new Error('Timeout'));};x.onerror=function(){j(new Error('KO'));};x.onload=function(){x.status>=200&&x.status<300?r(x.response):j(new Error('HTTP '+x.status));};x.send();});}
 function xhrJSON(url){return new Promise(function(r,j){var x=new XMLHttpRequest();x.open('GET',url,true);x.timeout=25000;x.ontimeout=function(){j(new Error('Timeout'));};x.onerror=function(){j(new Error('KO'));};x.onload=function(){x.status>=200&&x.status<300?r(JSON.parse(x.responseText)):j(new Error('HTTP '+x.status));};x.send();});}
 
+function tripEntry(tid){
+  if(!TRIPS||!tid)return null;
+  var t=TRIPS.t;
+  return t[tid]||t[tid.replace(/^[A-Za-z]+_/,'')]||t['U_'+tid]||null;
+}
 function getInfo(tripId,routeId){
   var rid=(routeId&&ROUTES[routeId])?routeId:null;
   var headsign=null,dir=-1;
-  if(TRIPS&&tripId&&TRIPS.t[tripId]){var e=TRIPS.t[tripId];if(!rid&&e[0]>=0)rid=TRIPS.k[e[0]];headsign=e[1];dir=e[2];}
+  if(TRIPS&&tripId&&tripEntry(tripId)){var e=tripEntry(tripId);if(!rid&&e[0]>=0)rid=TRIPS.k[e[0]];headsign=e[1];dir=e[2];}
   return{rid:rid,headsign:headsign,dir:dir};
 }
 
@@ -525,6 +530,18 @@ async function probeTU(){
     var buf=await xhrBin('https://tam-montpellier.jade-renaut.workers.dev?f=tu',12000);
     var m=FeedMsg.decode(new Uint8Array(buf)),rt={},n=0,withVeh=0;
     (m.entity||[]).forEach(function(e){if(!e.trip_update)return;n++;var t=e.trip_update.trip||{};var r=t.route_id||'(vide)';rt[r]=(rt[r]||0)+1;if(e.trip_update.vehicle)withVeh++;});
+    var wv={},now=Math.floor(Date.now()/1000),shown={};
+    function num(x){return x&&x.toNumber?x.toNumber():Number(x||0);}
+    (m.entity||[]).forEach(function(e){
+      if(!e.trip_update)return;var tu=e.trip_update,t=tu.trip||{},r=t.route_id;
+      if(tu.vehicle)wv[r]=(wv[r]||0)+1;
+      if((r==='4'||r==='8')&&shown[r]!==2){
+        shown[r]=(shown[r]||0)+1;
+        var st=(tu.stop_time_update||[]);
+        console.log('SAMPLE TU ligne',r,'| trip_id',t.trip_id,'| vehicule',tu.vehicle?JSON.stringify(tu.vehicle):'aucun','| nb arrets',st.length,'| 4 premiers (stop_id, arrivee-now en s, retard):',JSON.stringify(st.slice(0,4).map(function(x){return [x.stop_id,x.arrival?num(x.arrival.time)-now:null,x.arrival?x.arrival.delay:null];})));
+      }
+    });
+    console.log('TU avec vehicule par ligne:',JSON.stringify(wv));
     console.log('PROBE TU | octets:',buf.byteLength,'| trip_updates:',n,'| avec vehicule:',withVeh,'| lignes:',JSON.stringify(rt));
   }catch(e){console.log('PROBE TU | ECHEC:',e.message);}
 }
@@ -560,7 +577,7 @@ async function fetchVehicles(){
       });
       vehicles.forEach(function(v){if(!v.rid)unk++;});
       if(TRIPS&&!window._mmDone){window._mmDone=1;var mm={},ok=0,nf=0;
-        (msg.entity||[]).forEach(function(e){if(!e.vehicle)return;var t=e.vehicle.trip||{},en=TRIPS.t[t.trip_id];
+        (msg.entity||[]).forEach(function(e){if(!e.vehicle)return;var t=e.vehicle.trip||{},en=tripEntry(t.trip_id);
           if(!en){nf++;return;}var tr=TRIPS.k[en[0]];if(tr===t.route_id){ok++;}else{var k=t.route_id+'->'+tr;mm[k]=(mm[k]||0)+1;}});
         console.log('DIAG table trips: concordants',ok,'| trip_id absents de la table',nf,'| discordants',JSON.stringify(mm));
         var sf=[],sk=Object.keys(TRIPS.t);(msg.entity||[]).forEach(function(e){if(sf.length<4&&e.vehicle&&e.vehicle.trip)sf.push(e.vehicle.trip.trip_id);});
