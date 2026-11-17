@@ -562,7 +562,9 @@ async function fetchVehicles(){
       if(TRIPS&&!window._mmDone){window._mmDone=1;var mm={},ok=0,nf=0;
         (msg.entity||[]).forEach(function(e){if(!e.vehicle)return;var t=e.vehicle.trip||{},en=TRIPS.t[t.trip_id];
           if(!en){nf++;return;}var tr=TRIPS.k[en[0]];if(tr===t.route_id){ok++;}else{var k=t.route_id+'->'+tr;mm[k]=(mm[k]||0)+1;}});
-        console.log('DIAG table trips: concordants',ok,'| trip_id absents de la table',nf,'| discordants',JSON.stringify(mm));}
+        console.log('DIAG table trips: concordants',ok,'| trip_id absents de la table',nf,'| discordants',JSON.stringify(mm));
+        var sf=[],sk=Object.keys(TRIPS.t);(msg.entity||[]).forEach(function(e){if(sf.length<4&&e.vehicle&&e.vehicle.trip)sf.push(e.vehicle.trip.trip_id);});
+        console.log('DIAG exemples trip_id flux:',JSON.stringify(sf),'| exemples table:',JSON.stringify(sk.slice(0,4)),'| taille table:',sk.length);}
       console.log('DIAG route_id du flux:',JSON.stringify(raw),'| vehicules sans ligne reconnue:',unk,'/',vehicles.length);
     })();
     updateMarkers();updateStats();updateCounts();
