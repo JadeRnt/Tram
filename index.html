@@ -259,7 +259,10 @@ var pickState={};
 var PROTO=`syntax="proto2";
 message FeedMessage{required FeedHeader header=1;repeated FeedEntity entity=2;}
 message FeedHeader{required string gtfs_realtime_version=1;optional uint64 timestamp=3;}
-message FeedEntity{required string id=1;optional VehiclePosition vehicle=4;}
+message FeedEntity{required string id=1;optional TripUpdate trip_update=3;optional VehiclePosition vehicle=4;}
+message TripUpdate{optional TripDescriptor trip=1;repeated StopTimeUpdate stop_time_update=2;optional VehicleDescriptor vehicle=3;optional uint64 timestamp=4;}
+message StopTimeUpdate{optional uint32 stop_sequence=1;optional StopTimeEvent arrival=2;optional StopTimeEvent departure=3;optional string stop_id=4;}
+message StopTimeEvent{optional int32 delay=1;optional int64 time=2;}
 message VehiclePosition{optional TripDescriptor trip=1;optional Position position=2;optional uint32 current_status=4;optional uint64 timestamp=5;optional VehicleDescriptor vehicle=8;}
 message VehicleDescriptor{optional string id=1;optional string label=2;}
 message TripDescriptor{optional string trip_id=1;optional string route_id=5;}
@@ -476,6 +479,7 @@ async function bootstrap(){
 
     setTxt('Récupération des véhicules…');
     await fetchVehicles();
+    probeTU();
     document.getElementById('refresh-btn').disabled=false;
     interval=setInterval(fetchVehicles,REFRESH_MS);
   }catch(err){console.error(err);setStatus('error');hideOverlay();showErr('Erreur: '+err.message);}
@@ -514,6 +518,15 @@ async function probeSources(){
       console.log('PROBE',u,'| octets:',buf.byteLength,'| entites:',ents.length,'| positions:',veh,'| lignes:',JSON.stringify(rt));
     }catch(e){console.log('PROBE',u,'| ECHEC:',e.message);}
   }
+}
+
+async function probeTU(){
+  try{
+    var buf=await xhrBin('https://tam-montpellier.jade-renaut.workers.dev?f=tu',12000);
+    var m=FeedMsg.decode(new Uint8Array(buf)),rt={},n=0,withVeh=0;
+    (m.entity||[]).forEach(function(e){if(!e.trip_update)return;n++;var t=e.trip_update.trip||{};var r=t.route_id||'(vide)';rt[r]=(rt[r]||0)+1;if(e.trip_update.vehicle)withVeh++;});
+    console.log('PROBE TU | octets:',buf.byteLength,'| trip_updates:',n,'| avec vehicule:',withVeh,'| lignes:',JSON.stringify(rt));
+  }catch(e){console.log('PROBE TU | ECHEC:',e.message);}
 }
 async function fetchVehicles(){
   setStatus('loading');hideErr();
