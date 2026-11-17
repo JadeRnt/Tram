@@ -478,6 +478,7 @@ async function bootstrap(){
 
     setTxt('Récupération des véhicules…');
     await fetchVehicles();
+    probeSources();
     document.getElementById('refresh-btn').disabled=false;
     interval=setInterval(fetchVehicles,REFRESH_MS);
   }catch(err){console.error(err);setStatus('error');hideOverlay();showErr('Erreur: '+err.message);}
@@ -500,6 +501,22 @@ function estimateSpeed(v){
   }
   if(p.spd===null)return (now-p.chg>45000)?0:null;
   return (now-p.chg>45000)?0:p.spd;
+}
+
+// Diagnostic unique : que contient chaque source ?
+async function probeSources(){
+  for(var i=0;i<GTFS_URLS.length;i++){
+    var u=GTFS_URLS[i];
+    try{
+      var buf=await xhrBin(u,12000);
+      var m=FeedMsg.decode(new Uint8Array(buf));
+      var ents=m.entity||[],veh=0,tu=0,al=0,rt={};
+      ents.forEach(function(e){
+        if(e.vehicle&&e.vehicle.position){veh++;var r=(e.vehicle.trip&&e.vehicle.trip.route_id)||'(vide)';rt[r]=(rt[r]||0)+1;}
+      });
+      console.log('PROBE',u,'| octets:',buf.byteLength,'| entites:',ents.length,'| positions:',veh,'| lignes:',JSON.stringify(rt));
+    }catch(e){console.log('PROBE',u,'| ECHEC:',e.message);}
+  }
 }
 async function fetchVehicles(){
   setStatus('loading');hideErr();
