@@ -134,6 +134,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:9px
 #error-banner{display:none;background:#160a0a;border-bottom:1px solid #7f1d1d;color:#fca5a5;padding:6px 14px;font-family:'Space Mono',monospace;font-size:.6rem;text-align:center;flex-shrink:0}
 .timer-wrap{height:2px;background:var(--border);flex-shrink:0}
 .timer-bar{height:100%;background:var(--accent);width:100%}
+.tiles-dark{filter:invert(1) hue-rotate(180deg) brightness(.9) contrast(.85) saturate(.6)}
 </style>
 </head>
 <body>
@@ -235,7 +236,12 @@ function toggleTheme(){
 // ═══════════════════════════════
 // CONFIG
 // ═══════════════════════════════
-var GTFS_URL  ='https://tam-montpellier.jade-renaut.workers.dev';
+var GTFS_URLS=[
+  'https://tam-montpellier.jade-renaut.workers.dev',
+  'https://data.montpellier3m.fr/GTFS/Urbain/VehiclePosition.pb',
+  'https://data.montpellier3m.fr/TAM_MMM_GTFSRT/VehiclePosition.pb'
+];
+var gtfsIdx=0;
 var TRIPS_URL ='gtfs_trips.json';
 var REFRESH_MS=10000;
 var mapObj,FeedMsg;
@@ -452,8 +458,8 @@ async function bootstrap(){
 
     setTxt('Initialisation carte…');
     mapObj=L.map('map',{center:[43.6117,3.8767],zoom:13});
-    window._DT=L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {attribution:'© OSM © CARTO',subdomains:'abcd',maxZoom:19});
-    window._LT=L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'© OSM © CARTO',subdomains:'abcd',maxZoom:19});
+    window._DT=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19,className:'tiles-dark'});
+    window._LT=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19});
     (document.documentElement.classList.contains('light')?window._LT:window._DT).addTo(mapObj);
 
     buildSidebar();
@@ -481,7 +487,13 @@ async function bootstrap(){
 async function fetchVehicles(){
   setStatus('loading');hideErr();
   try{
-    var buf=await xhrBin(GTFS_URL,12000);
+    var buf=null,lastErr=null;
+    for(var i=0;i<GTFS_URLS.length&&!buf;i++){
+      var u=GTFS_URLS[(gtfsIdx+i)%GTFS_URLS.length];
+      try{buf=await xhrBin(u,12000);gtfsIdx=(gtfsIdx+i)%GTFS_URLS.length;}
+      catch(e){lastErr=e;console.warn('flux KO:',u,e.message);}
+    }
+    if(!buf)throw lastErr||new Error('Aucune source de flux');
     var msg=FeedMsg.decode(new Uint8Array(buf));
     vehicles=(msg.entity||[]).filter(function(e){return e.vehicle&&e.vehicle.position;}).map(function(e){
       var v=e.vehicle,tid=(v.trip&&v.trip.trip_id)||'',rid=(v.trip&&v.trip.route_id)||'';
