@@ -238,10 +238,8 @@ function toggleTheme(){
 // ═══════════════════════════════
 var GTFS_URLS=[
   'https://tam-montpellier.jade-renaut.workers.dev?i=0',
-  'https://tam-montpellier.jade-renaut.workers.dev?i=1',
-  'https://tam-montpellier.jade-renaut.workers.dev?i=2',
-  'https://tam-montpellier.jade-renaut.workers.dev?i=3'
-];
+  'https://tam-montpellier.jade-renaut.workers.dev?i=0'
+]; // 2 essais sur la meme source
 var gtfsIdx=0;
 var TRIPS_URL ='gtfs_trips.json';
 var REFRESH_MS=10000;
@@ -478,7 +476,6 @@ async function bootstrap(){
 
     setTxt('Récupération des véhicules…');
     await fetchVehicles();
-    probeSources();
     document.getElementById('refresh-btn').disabled=false;
     interval=setInterval(fetchVehicles,REFRESH_MS);
   }catch(err){console.error(err);setStatus('error');hideOverlay();showErr('Erreur: '+err.message);}
@@ -549,6 +546,10 @@ async function fetchVehicles(){
         raw[rid]=(raw[rid]||0)+1;
       });
       vehicles.forEach(function(v){if(!v.rid)unk++;});
+      if(TRIPS&&!window._mmDone){window._mmDone=1;var mm={},ok=0,nf=0;
+        (msg.entity||[]).forEach(function(e){if(!e.vehicle)return;var t=e.vehicle.trip||{},en=TRIPS.t[t.trip_id];
+          if(!en){nf++;return;}var tr=TRIPS.k[en[0]];if(tr===t.route_id){ok++;}else{var k=t.route_id+'->'+tr;mm[k]=(mm[k]||0)+1;}});
+        console.log('DIAG table trips: concordants',ok,'| trip_id absents de la table',nf,'| discordants',JSON.stringify(mm));}
       console.log('DIAG route_id du flux:',JSON.stringify(raw),'| vehicules sans ligne reconnue:',unk,'/',vehicles.length);
     })();
     updateMarkers();updateStats();updateCounts();
